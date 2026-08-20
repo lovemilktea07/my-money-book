@@ -413,7 +413,6 @@
   <div class="card">
     <div class="section-head">
       <h2 class="section-title">本月繳費 🧾</h2>
-      <button class="mini-add" id="miniAddBtn">＋ 新增</button>
     </div>
     <div id="items"></div>
   </div>
@@ -661,7 +660,6 @@ function openAdd(){
 }
 
 document.getElementById('addBtn').addEventListener('click', openAdd);
-document.getElementById('miniAddBtn').addEventListener('click', openAdd);
 
 document.getElementById('cancelBtn').addEventListener('click', () => {
   addDialog.close();
