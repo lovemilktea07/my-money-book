@@ -2,123 +2,281 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#fff8e9">
 <title>我的熊熊記帳本</title>
-
 <style>
-body {
-  margin: 0;
-  background: #fff8e9;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #5b402c;
-}
-.price-input {
-  width: 90px;
-  border: none;
-  background: transparent;
-  color: #5b402c;
-  font: inherit;
-  font-weight: bold;
-  font-size: 1em;
-  text-align: right;
-  padding: 0;
-  margin: 0;
-  outline: none;
-  flex-shrink: 0;
-}
-.container {
-  max-width: 500px;
-  margin: auto;
-  padding: 24px 18px 50px;
-}
+  :root{
+    --bg:#fff8e9;
+    --card:#ffffff;
+    --text:#5b402c;
+    --muted:#9a806d;
+    --line:#eee0ca;
+    --brown:#9a6843;
+    --green:#6da85c;
+    --red:#e77b72;
+    --shadow:0 4px 15px rgba(154,104,67,.14);
+  }
 
-.hero {
-  text-align: center;
-  padding: 25px 10px;
-}
+  *{box-sizing:border-box}
 
-.bear {
-  font-size: 80px;
-}
+  body{
+    margin:0;
+    background:var(--bg);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;
+    color:var(--text);
+  }
 
-h1 {
-  margin: 5px;
-}
+  button,input{font:inherit}
 
-.card {
-  background: white;
-  border-radius: 24px;
-  padding: 20px;
-  margin-bottom: 18px;
-  box-shadow: 0 4px 15px #ead9bd;
-}
+  .container{
+    max-width:500px;
+    margin:auto;
+    padding:24px 18px 80px;
+  }
 
-.summary {
-  display: flex;
-  justify-content: space-between;
-  text-align: center;
-}
+  .hero{
+    text-align:center;
+    padding:20px 10px 14px;
+  }
 
-.summary div {
-  flex: 1;
-}
+  .bear{
+    font-size:78px;
+    line-height:1;
+    margin-bottom:8px;
+  }
 
-.amount {
-  font-size: 23px;
-  font-weight: bold;
-}
+  h1{
+    margin:4px 0 6px;
+    font-size:30px;
+  }
 
-.paid {
-  color: #6da85c;
-}
+  .hero p{
+    margin:0;
+    color:var(--muted);
+  }
 
-.unpaid {
-  color: #e77b72;
-}
+  .card{
+    background:var(--card);
+    border-radius:24px;
+    padding:20px;
+    margin-bottom:18px;
+    box-shadow:var(--shadow);
+  }
 
-.item {
-  display: flex;
-  align-items: center;
-  padding: 16px 0;
-  border-bottom: 1px solid #eee0ca;
-}
+  .month-title{
+    margin:0 0 18px;
+    font-size:22px;
+  }
 
-.item:last-child {
-  border: none;
-}
+  .summary{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    text-align:center;
+  }
 
-.item input {
-  width: 25px;
-  height: 25px;
-  margin-right: 14px;
-}
+  .summary-label{
+    font-size:14px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
 
-.name {
-  flex: 1;
-  font-weight: bold;
-}
+  .amount{
+    font-size:22px;
+    font-weight:800;
+    white-space:nowrap;
+  }
 
-.price {
-  font-weight: bold;
-}
+  .paid{color:var(--green)}
+  .unpaid{color:var(--red)}
 
-button {
-  width: 100%;
-  border: 0;
-  border-radius: 18px;
-  padding: 16px;
-  background: #9a6843;
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
-}
+  .section-title{
+    margin:0 0 4px;
+    font-size:21px;
+  }
+
+  .item{
+    display:grid;
+    grid-template-columns:32px minmax(0,1fr) 112px;
+    align-items:center;
+    gap:10px;
+    min-height:68px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .item:last-child{border-bottom:none}
+
+  .check{
+    width:24px;
+    height:24px;
+    accent-color:var(--green);
+    margin:0;
+  }
+
+  .item-main{
+    min-width:0;
+  }
+
+  .name{
+    display:block;
+    font-weight:800;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  .meta{
+    display:block;
+    margin-top:4px;
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  .price-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    min-width:0;
+  }
+
+  .currency{
+    position:absolute;
+    left:8px;
+    color:var(--text);
+    font-weight:800;
+    pointer-events:none;
+  }
+
+  .price-input{
+    width:100%;
+    border:1px solid transparent;
+    border-radius:12px;
+    background:transparent;
+    color:var(--text);
+    font:inherit;
+    font-size:16px;
+    font-weight:800;
+    text-align:right;
+    padding:9px 8px 9px 24px;
+    outline:none;
+  }
+
+  .price-input:focus{
+    border-color:#d9c3a6;
+    background:#fffaf2;
+  }
+
+  .item.paid-item .name,
+  .item.paid-item .price-input,
+  .item.paid-item .currency{
+    color:#9b9b9b;
+    text-decoration:line-through;
+  }
+
+  .delete-btn{
+    margin-top:8px;
+    border:0;
+    background:transparent;
+    color:#b49782;
+    font-size:12px;
+    padding:0;
+  }
+
+  .actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .btn{
+    border:0;
+    border-radius:18px;
+    padding:15px 12px;
+    font-weight:800;
+    cursor:pointer;
+  }
+
+  .btn-primary{
+    background:var(--brown);
+    color:white;
+  }
+
+  .btn-secondary{
+    background:#eadcc7;
+    color:var(--text);
+  }
+
+  .tip{
+    margin:14px 4px 0;
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  dialog{
+    width:min(92vw,420px);
+    border:0;
+    border-radius:24px;
+    padding:0;
+    box-shadow:0 20px 60px rgba(0,0,0,.2);
+  }
+
+  dialog::backdrop{
+    background:rgba(55,39,28,.28);
+  }
+
+  .dialog-body{
+    padding:22px;
+    background:#fffdf8;
+  }
+
+  .dialog-body h2{
+    margin:0 0 16px;
+  }
+
+  .field{
+    margin-bottom:14px;
+  }
+
+  .field label{
+    display:block;
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+
+  .field input{
+    width:100%;
+    border:1px solid #dfcfba;
+    border-radius:14px;
+    padding:12px 14px;
+    outline:none;
+    background:white;
+    color:var(--text);
+  }
+
+  .dialog-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:18px;
+  }
+
+  @media (max-width:390px){
+    .item{
+      grid-template-columns:30px minmax(0,1fr) 100px;
+      gap:8px;
+    }
+    .amount{font-size:19px}
+    .price-input{font-size:15px}
+  }
 </style>
 </head>
-
 <body>
 
 <div class="container">
-
   <div class="hero">
     <div class="bear">🐻</div>
     <h1>我的熊熊記帳本</h1>
@@ -126,104 +284,197 @@ button {
   </div>
 
   <div class="card">
-    <h2>🌼 2026 年 8 月</h2>
-
+    <h2 class="month-title">🌼 2026 年 8 月</h2>
     <div class="summary">
       <div>
-        本月總額
+        <div class="summary-label">本月總額</div>
         <div class="amount" id="total">$0</div>
       </div>
-
       <div>
-        已繳
+        <div class="summary-label">已繳</div>
         <div class="amount paid" id="paid">$0</div>
       </div>
-
       <div>
-        待繳
+        <div class="summary-label">待繳</div>
         <div class="amount unpaid" id="unpaid">$0</div>
       </div>
     </div>
   </div>
 
   <div class="card">
-
-    <h2>本月繳費 🧾</h2>
-
-    <div class="item">
-      <input type="checkbox">
-      <span class="name">📶 網路費</span>
-      <input class="price-input" type="number" value="1299">
-    </div>
-
-    <div class="item">
-      <input type="checkbox" data-price="5700">
-      <span class="name">🏠 房租</span>
-      <span class="price">$5,700</span>
-    </div>
-
-    <div class="item">
-      <input type="checkbox" data-price="2500">
-      <span class="name">🛡️ 國泰保費</span>
-      <span class="price">$2,500</span>
-    </div>
-
-    <div class="item">
-      <input type="checkbox" data-price="2864">
-      <span class="name">💳 富邦保費分期 8/12</span>
-      <span class="price">$2,864</span>
-    </div>
-
+    <h2 class="section-title">本月繳費 🧾</h2>
+    <div id="items"></div>
   </div>
 
-  <button>＋ 記一筆支出</button>
+  <div class="actions">
+    <button class="btn btn-primary" id="addBtn">＋ 記一筆支出</button>
+    <button class="btn btn-secondary" id="resetBtn">重設本月資料</button>
+  </div>
 
+  <div class="tip">點金額就能直接修改，資料會自動保存在這支手機裡。</div>
 </div>
 
+<dialog id="addDialog">
+  <form method="dialog" class="dialog-body" id="addForm">
+    <h2>新增支出 🐻</h2>
+
+    <div class="field">
+      <label for="newName">項目名稱</label>
+      <input id="newName" autocomplete="off" required>
+    </div>
+
+    <div class="field">
+      <label for="newAmount">金額</label>
+      <input id="newAmount" type="number" inputmode="numeric" min="0" required>
+    </div>
+
+    <div class="field">
+      <label for="newNote">備註（可不填）</label>
+      <input id="newNote" autocomplete="off">
+    </div>
+
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" value="cancel" type="button" id="cancelBtn">取消</button>
+      <button class="btn btn-primary" type="submit">加入</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
-const boxes = document.querySelectorAll('input[type="checkbox"]');
+const STORAGE_KEY = 'bear-money-book-2026-08-v3';
 
-function calculate() {
-  let total = 0;
-  let paid = 0;
+const defaultItems = [
+  { id:'internet', name:'📶 網路費', amount:1299, note:'', paid:false },
+  { id:'rent', name:'🏠 房租', amount:5700, note:'4745 + 955', paid:false },
+  { id:'cathay', name:'🛡️ 國泰保費', amount:2500, note:'', paid:false },
+  { id:'fubon-installment', name:'💳 富邦保費分期', amount:2864, note:'8/12', paid:false }
+];
 
-  boxes.forEach(box => {
-    const priceInput = box.closest('.item').querySelector('.price-input');
-const price = priceInput ? Number(priceInput.value) : Number(box.dataset.price);
-total += price;
-    if (box.checked) {
-      paid += price;
-    }
-  });
+let items = loadItems();
 
-  document.getElementById("total").textContent =
-    "$" + total.toLocaleString();
-
-  document.getElementById("paid").textContent =
-    "$" + paid.toLocaleString();
-
-  document.getElementById("unpaid").textContent =
-    "$" + (total - paid).toLocaleString();
+function loadItems(){
+  try{
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(saved) return JSON.parse(saved);
+  }catch(e){}
+  return structuredClone(defaultItems);
 }
 
-boxes.forEach(box => {
-  box.addEventListener("change", calculate);
-});
-const priceInputs = document.querySelectorAll('.price-input');
+function saveItems(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
 
-priceInputs.forEach((input, index) => {
-  const savedPrice = localStorage.getItem('price-' + index);
+function money(n){
+  return '$' + Number(n || 0).toLocaleString('zh-TW');
+}
 
-  if (savedPrice !== null) {
-    input.value = savedPrice;
-  }
+function render(){
+  const wrap = document.getElementById('items');
+  wrap.innerHTML = '';
 
-  input.addEventListener('input', () => {
-    localStorage.setItem('price-' + index, input.value);
-    calculate();
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'item' + (item.paid ? ' paid-item' : '');
+
+    row.innerHTML = `
+      <input class="check" type="checkbox" ${item.paid ? 'checked' : ''} aria-label="已繳">
+      <div class="item-main">
+        <span class="name"></span>
+        ${item.note ? '<span class="meta"></span>' : ''}
+        <button class="delete-btn" type="button">刪除</button>
+      </div>
+      <div class="price-wrap">
+        <span class="currency">$</span>
+        <input class="price-input" type="number" inputmode="numeric" min="0" value="${item.amount}">
+      </div>
+    `;
+
+    row.querySelector('.name').textContent = item.name;
+    const meta = row.querySelector('.meta');
+    if(meta) meta.textContent = item.note;
+
+    const check = row.querySelector('.check');
+    const input = row.querySelector('.price-input');
+    const del = row.querySelector('.delete-btn');
+
+    check.addEventListener('change', () => {
+      item.paid = check.checked;
+      saveItems();
+      render();
+    });
+
+    input.addEventListener('input', () => {
+      item.amount = Number(input.value) || 0;
+      saveItems();
+      updateSummary();
+    });
+
+    del.addEventListener('click', () => {
+      if(confirm(`刪除「${item.name}」嗎？`)){
+        items = items.filter(x => x.id !== item.id);
+        saveItems();
+        render();
+      }
+    });
+
+    wrap.appendChild(row);
   });
+
+  updateSummary();
+}
+
+function updateSummary(){
+  const total = items.reduce((sum, x) => sum + Number(x.amount || 0), 0);
+  const paid = items.reduce((sum, x) => sum + (x.paid ? Number(x.amount || 0) : 0), 0);
+
+  document.getElementById('total').textContent = money(total);
+  document.getElementById('paid').textContent = money(paid);
+  document.getElementById('unpaid').textContent = money(total - paid);
+}
+
+const dialog = document.getElementById('addDialog');
+const form = document.getElementById('addForm');
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  form.reset();
+  dialog.showModal();
 });
-calculate();
+
+document.getElementById('cancelBtn').addEventListener('click', () => {
+  dialog.close();
+});
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById('newName').value.trim();
+  const amount = Number(document.getElementById('newAmount').value) || 0;
+  const note = document.getElementById('newNote').value.trim();
+
+  if(!name) return;
+
+  items.push({
+    id: Date.now().toString(),
+    name: '💰 ' + name,
+    amount,
+    note,
+    paid:false
+  });
+
+  saveItems();
+  dialog.close();
+  render();
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if(confirm('要把 2026 年 8 月資料重設成最初版本嗎？')){
+    items = structuredClone(defaultItems);
+    saveItems();
+    render();
+  }
+});
+
+render();
 </script>
 
 </body>
