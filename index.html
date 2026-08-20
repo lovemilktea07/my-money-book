@@ -91,6 +91,38 @@
     font-weight:800;
   }
 
+  .month-picker-wrap{
+    display:flex;
+    justify-content:center;
+    margin:-6px 0 18px;
+  }
+
+  .month-picker-open{
+    border:0;
+    border-radius:14px;
+    background:#f7eddf;
+    color:var(--text);
+    padding:9px 14px;
+    font-weight:800;
+  }
+
+  .picker-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .picker-grid select,
+  .picker-grid input{
+    width:100%;
+    border:1px solid #dfcfba;
+    border-radius:14px;
+    padding:12px 14px;
+    outline:none;
+    background:white;
+    color:var(--text);
+  }
+
   .summary{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -394,6 +426,10 @@
       <button class="month-btn" id="nextMonth">›</button>
     </div>
 
+    <div class="month-picker-wrap">
+      <button class="month-picker-open" id="openMonthPicker">📅 選擇年月</button>
+    </div>
+
     <div class="summary">
       <div>
         <div class="summary-label">本月總額</div>
@@ -427,6 +463,42 @@
     每個月份的資料會分開保存。
   </div>
 </div>
+
+<dialog id="monthPickerDialog">
+  <div class="dialog-body">
+    <h2>📅 選擇年月</h2>
+
+    <div class="picker-grid">
+      <div class="field">
+        <label for="pickYear">年份</label>
+        <input id="pickYear" type="number" inputmode="numeric" min="2000" max="2100">
+      </div>
+
+      <div class="field">
+        <label for="pickMonth">月份</label>
+        <select id="pickMonth">
+          <option value="1">1 月</option>
+          <option value="2">2 月</option>
+          <option value="3">3 月</option>
+          <option value="4">4 月</option>
+          <option value="5">5 月</option>
+          <option value="6">6 月</option>
+          <option value="7">7 月</option>
+          <option value="8">8 月</option>
+          <option value="9">9 月</option>
+          <option value="10">10 月</option>
+          <option value="11">11 月</option>
+          <option value="12">12 月</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" type="button" id="cancelMonthPicker">取消</button>
+      <button class="btn btn-primary" type="button" id="confirmMonthPicker">前往</button>
+    </div>
+  </div>
+</dialog>
 
 <dialog id="addDialog">
   <form method="dialog" class="dialog-body" id="addForm">
@@ -788,6 +860,33 @@ function shiftMonth(delta){
 
 document.getElementById('prevMonth').addEventListener('click', () => shiftMonth(-1));
 document.getElementById('nextMonth').addEventListener('click', () => shiftMonth(1));
+
+const monthPickerDialog = document.getElementById('monthPickerDialog');
+
+document.getElementById('openMonthPicker').addEventListener('click', () => {
+  document.getElementById('pickYear').value = current.year;
+  document.getElementById('pickMonth').value = current.month;
+  monthPickerDialog.showModal();
+});
+
+document.getElementById('cancelMonthPicker').addEventListener('click', () => {
+  monthPickerDialog.close();
+});
+
+document.getElementById('confirmMonthPicker').addEventListener('click', () => {
+  const year = Number(document.getElementById('pickYear').value);
+  const month = Number(document.getElementById('pickMonth').value);
+
+  if(year < 2000 || year > 2100 || month < 1 || month > 12){
+    alert('請輸入正確的年份與月份');
+    return;
+  }
+
+  current.year = year;
+  current.month = month;
+  monthPickerDialog.close();
+  render();
+});
 
 render();
 </script>
