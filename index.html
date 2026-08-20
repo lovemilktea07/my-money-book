@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的熊熊記帳本</title>
+
+<style>
+body {
+  margin: 0;
+  background: #fff8e9;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #5b402c;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  padding: 24px 18px 50px;
+}
+
+.hero {
+  text-align: center;
+  padding: 25px 10px;
+}
+
+.bear {
+  font-size: 80px;
+}
+
+h1 {
+  margin: 5px;
+}
+
+.card {
+  background: white;
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 15px #ead9bd;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.summary div {
+  flex: 1;
+}
+
+.amount {
+  font-size: 23px;
+  font-weight: bold;
+}
+
+.paid {
+  color: #6da85c;
+}
+
+.unpaid {
+  color: #e77b72;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #eee0ca;
+}
+
+.item:last-child {
+  border: none;
+}
+
+.item input {
+  width: 25px;
+  height: 25px;
+  margin-right: 14px;
+}
+
+.name {
+  flex: 1;
+  font-weight: bold;
+}
+
+.price {
+  font-weight: bold;
+}
+
+button {
+  width: 100%;
+  border: 0;
+  border-radius: 18px;
+  padding: 16px;
+  background: #9a6843;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="hero">
+    <div class="bear">🐻</div>
+    <h1>我的熊熊記帳本</h1>
+    <p>用心記錄每一筆 ♡</p>
+  </div>
+
+  <div class="card">
+    <h2>🌼 2026 年 8 月</h2>
+
+    <div class="summary">
+      <div>
+        本月總額
+        <div class="amount" id="total">$0</div>
+      </div>
+
+      <div>
+        已繳
+        <div class="amount paid" id="paid">$0</div>
+      </div>
+
+      <div>
+        待繳
+        <div class="amount unpaid" id="unpaid">$0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <h2>本月繳費 🧾</h2>
+
+    <div class="item">
+      <input type="checkbox" data-price="1199">
+      <span class="name">📶 網路費</span>
+      <span class="price">$1,199</span>
+    </div>
+
+    <div class="item">
+      <input type="checkbox" data-price="5700">
+      <span class="name">🏠 房租</span>
+      <span class="price">$5,700</span>
+    </div>
+
+    <div class="item">
+      <input type="checkbox" data-price="2500">
+      <span class="name">🛡️ 國泰保費</span>
+      <span class="price">$2,500</span>
+    </div>
+
+    <div class="item">
+      <input type="checkbox" data-price="2864">
+      <span class="name">💳 富邦保費分期 8/12</span>
+      <span class="price">$2,864</span>
+    </div>
+
+  </div>
+
+  <button>＋ 記一筆支出</button>
+
+</div>
+
+<script>
+const boxes = document.querySelectorAll('input[type="checkbox"]');
+
+function calculate() {
+  let total = 0;
+  let paid = 0;
+
+  boxes.forEach(box => {
+    const price = Number(box.dataset.price);
+    total += price;
+
+    if (box.checked) {
+      paid += price;
+    }
+  });
+
+  document.getElementById("total").textContent =
+    "$" + total.toLocaleString();
+
+  document.getElementById("paid").textContent =
+    "$" + paid.toLocaleString();
+
+  document.getElementById("unpaid").textContent =
+    "$" + (total - paid).toLocaleString();
+}
+
+boxes.forEach(box => {
+  box.addEventListener("change", calculate);
+});
+
+calculate();
+</script>
+
+</body>
+</html>
