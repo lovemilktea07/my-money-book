@@ -91,9 +91,33 @@
   .paid{color:var(--green)}
   .unpaid{color:var(--red)}
 
+  .section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:4px;
+  }
+
   .section-title{
-    margin:0 0 4px;
+    margin:0;
     font-size:21px;
+  }
+
+  .mini-add{
+    border:0;
+    border-radius:12px;
+    background:#eadcc7;
+    color:var(--text);
+    padding:8px 12px;
+    font-weight:800;
+  }
+
+  .empty{
+    text-align:center;
+    color:var(--muted);
+    padding:26px 8px 18px;
+    line-height:1.7;
   }
 
   .item{
@@ -101,7 +125,7 @@
     grid-template-columns:32px minmax(0,1fr) 112px;
     align-items:center;
     gap:10px;
-    min-height:68px;
+    min-height:72px;
     border-bottom:1px solid var(--line);
   }
 
@@ -114,9 +138,7 @@
     margin:0;
   }
 
-  .item-main{
-    min-width:0;
-  }
+  .item-main{min-width:0}
 
   .name{
     display:block;
@@ -131,6 +153,15 @@
     margin-top:4px;
     font-size:12px;
     color:var(--muted);
+  }
+
+  .delete-btn{
+    margin-top:8px;
+    border:0;
+    background:transparent;
+    color:#b49782;
+    font-size:12px;
+    padding:0;
   }
 
   .price-wrap{
@@ -175,15 +206,6 @@
     text-decoration:line-through;
   }
 
-  .delete-btn{
-    margin-top:8px;
-    border:0;
-    background:transparent;
-    color:#b49782;
-    font-size:12px;
-    padding:0;
-  }
-
   .actions{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -213,6 +235,7 @@
     text-align:center;
     color:var(--muted);
     font-size:12px;
+    line-height:1.6;
   }
 
   dialog{
@@ -302,21 +325,27 @@
   </div>
 
   <div class="card">
-    <h2 class="section-title">本月繳費 🧾</h2>
+    <div class="section-head">
+      <h2 class="section-title">本月繳費 🧾</h2>
+      <button class="mini-add" id="miniAddBtn">＋ 新增</button>
+    </div>
     <div id="items"></div>
   </div>
 
   <div class="actions">
-    <button class="btn btn-primary" id="addBtn">＋ 記一筆支出</button>
-    <button class="btn btn-secondary" id="resetBtn">重設本月資料</button>
+    <button class="btn btn-primary" id="addBtn">＋ 新增繳費項目</button>
+    <button class="btn btn-secondary" id="clearBtn">清空本月資料</button>
   </div>
 
-  <div class="tip">點金額就能直接修改，資料會自動保存在這支手機裡。</div>
+  <div class="tip">
+    項目、金額、備註都由你手動新增。<br>
+    修改金額、勾選已繳、新增或刪除後，會自動儲存在這支手機的 Safari。
+  </div>
 </div>
 
 <dialog id="addDialog">
   <form method="dialog" class="dialog-body" id="addForm">
-    <h2>新增支出 🐻</h2>
+    <h2>新增繳費項目 🐻</h2>
 
     <div class="field">
       <label for="newName">項目名稱</label>
@@ -334,21 +363,14 @@
     </div>
 
     <div class="dialog-actions">
-      <button class="btn btn-secondary" value="cancel" type="button" id="cancelBtn">取消</button>
+      <button class="btn btn-secondary" type="button" id="cancelBtn">取消</button>
       <button class="btn btn-primary" type="submit">加入</button>
     </div>
   </form>
 </dialog>
 
 <script>
-const STORAGE_KEY = 'bear-money-book-2026-08-v3';
-
-const defaultItems = [
-  { id:'internet', name:'📶 網路費', amount:1299, note:'', paid:false },
-  { id:'rent', name:'🏠 房租', amount:5700, note:'4745 + 955', paid:false },
-  { id:'cathay', name:'🛡️ 國泰保費', amount:2500, note:'', paid:false },
-  { id:'fubon-installment', name:'💳 富邦保費分期', amount:2864, note:'8/12', paid:false }
-];
+const STORAGE_KEY = 'bear-money-book-manual-2026-08-v1';
 
 let items = loadItems();
 
@@ -357,7 +379,7 @@ function loadItems(){
     const saved = localStorage.getItem(STORAGE_KEY);
     if(saved) return JSON.parse(saved);
   }catch(e){}
-  return structuredClone(defaultItems);
+  return [];
 }
 
 function saveItems(){
@@ -371,6 +393,17 @@ function money(n){
 function render(){
   const wrap = document.getElementById('items');
   wrap.innerHTML = '';
+
+  if(items.length === 0){
+    wrap.innerHTML = `
+      <div class="empty">
+        還沒有本月繳費項目 🐻<br>
+        點「＋ 新增」開始建立自己的清單
+      </div>
+    `;
+    updateSummary();
+    return;
+  }
 
   items.forEach(item => {
     const row = document.createElement('div');
@@ -435,10 +468,14 @@ function updateSummary(){
 const dialog = document.getElementById('addDialog');
 const form = document.getElementById('addForm');
 
-document.getElementById('addBtn').addEventListener('click', () => {
+function openAdd(){
   form.reset();
   dialog.showModal();
-});
+  setTimeout(() => document.getElementById('newName').focus(), 50);
+}
+
+document.getElementById('addBtn').addEventListener('click', openAdd);
+document.getElementById('miniAddBtn').addEventListener('click', openAdd);
 
 document.getElementById('cancelBtn').addEventListener('click', () => {
   dialog.close();
@@ -455,7 +492,7 @@ form.addEventListener('submit', (e) => {
 
   items.push({
     id: Date.now().toString(),
-    name: '💰 ' + name,
+    name,
     amount,
     note,
     paid:false
@@ -466,9 +503,11 @@ form.addEventListener('submit', (e) => {
   render();
 });
 
-document.getElementById('resetBtn').addEventListener('click', () => {
-  if(confirm('要把 2026 年 8 月資料重設成最初版本嗎？')){
-    items = structuredClone(defaultItems);
+document.getElementById('clearBtn').addEventListener('click', () => {
+  if(items.length === 0) return;
+
+  if(confirm('確定要清空 2026 年 8 月的所有繳費項目嗎？')){
+    items = [];
     saveItems();
     render();
   }
