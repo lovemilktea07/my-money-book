@@ -227,6 +227,57 @@
     margin-top:8px;
   }
 
+  .edit-toggle{
+    border:0;
+    border-radius:12px;
+    background:#f3e7d5;
+    color:var(--text);
+    padding:8px 12px;
+    font-weight:800;
+  }
+
+  .edit-toggle.active{
+    background:var(--brown);
+    color:white;
+  }
+
+  .edit-input{
+    width:100%;
+    border:1px solid #dfcfba;
+    border-radius:10px;
+    padding:7px 9px;
+    background:#fffaf2;
+    color:var(--text);
+    outline:none;
+    font:inherit;
+    font-weight:800;
+  }
+
+  .edit-note{
+    margin-top:5px;
+    font-size:12px;
+    font-weight:600;
+    color:var(--muted);
+  }
+
+  .view-only-actions{
+    display:none;
+  }
+
+  body.edit-mode .view-only-actions{
+    display:flex;
+  }
+
+  body:not(.edit-mode) .price-input{
+    pointer-events:none;
+    border-color:transparent;
+  }
+
+  body:not(.edit-mode) .price-input:focus{
+    background:transparent;
+    border-color:transparent;
+  }
+
   .tiny-btn{
     border:0;
     background:transparent;
@@ -274,12 +325,6 @@
     background:#fffaf2;
   }
 
-  .item.paid-item .name,
-  .item.paid-item .price-input,
-  .item.paid-item .currency{
-    color:#9b9b9b;
-    text-decoration:line-through;
-  }
 
   .actions{
     display:grid;
@@ -535,6 +580,7 @@
   <div class="card">
     <div class="section-head">
       <h2 class="section-title">本月繳費 🧾</h2>
+      <button class="edit-toggle" id="editModeBtn">✏️ 編輯</button>
     </div>
     <div id="items"></div>
   </div>
@@ -973,7 +1019,8 @@ function render(){
           ${item.favorite ? '<span class="fav-mark">★</span>' : ''}
         </div>
         ${item.note ? '<span class="meta"></span>' : ''}
-        <div class="row-actions">
+        <div class="row-actions view-only-actions">
+          <button class="tiny-btn edit-item-btn" type="button">修改文字</button>
           <button class="tiny-btn favorite" type="button">${item.favorite ? '取消常用' : '加入常用'}</button>
           <button class="tiny-btn delete-btn" type="button">刪除</button>
         </div>
@@ -990,8 +1037,50 @@ function render(){
 
     const check = row.querySelector('.check');
     const input = row.querySelector('.price-input');
+    const editItemBtn = row.querySelector('.edit-item-btn');
     const favBtn = row.querySelector('.tiny-btn.favorite');
     const del = row.querySelector('.delete-btn');
+
+    editItemBtn.addEventListener('click', () => {
+      const main = row.querySelector('.item-main');
+      const currentName = item.name || '';
+      const currentNote = item.note || '';
+
+      main.innerHTML = `
+        <input class="edit-input edit-name" type="text">
+        <input class="edit-input edit-note" type="text">
+        <div class="row-actions">
+          <button class="tiny-btn save-text-btn" type="button">儲存文字</button>
+          <button class="tiny-btn cancel-text-btn" type="button">取消</button>
+        </div>
+      `;
+
+      const nameInput = main.querySelector('.edit-name');
+      const noteInput = main.querySelector('.edit-note');
+      nameInput.value = currentName;
+      noteInput.value = currentNote;
+      nameInput.focus();
+
+      main.querySelector('.save-text-btn').addEventListener('click', () => {
+        const itemsNow = getCurrentItems();
+        const target = itemsNow.find(x => x.id === item.id);
+        if(target){
+          const nextName = nameInput.value.trim();
+          if(!nextName){
+            alert('項目名稱不能是空白');
+            return;
+          }
+          target.name = nextName;
+          target.note = noteInput.value.trim();
+          setCurrentItems(itemsNow);
+          render();
+        }
+      });
+
+      main.querySelector('.cancel-text-btn').addEventListener('click', () => {
+        render();
+      });
+    });
 
     check.addEventListener('change', () => {
       const itemsNow = getCurrentItems();
@@ -1287,6 +1376,18 @@ document.getElementById('confirmImport').addEventListener('click', () => {
   pendingImport = null;
 });
 
+
+
+let editMode = false;
+
+document.getElementById('editModeBtn').addEventListener('click', () => {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-mode', editMode);
+
+  const btn = document.getElementById('editModeBtn');
+  btn.classList.toggle('active', editMode);
+  btn.textContent = editMode ? '✅ 完成' : '✏️ 編輯';
+});
 
 render();
 </script>
