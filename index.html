@@ -328,8 +328,12 @@
 
   .actions{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:repeat(2,minmax(0,1fr));
     gap:12px;
+  }
+
+  .actions > :only-child{
+    grid-column:1 / -1;
   }
 
   .btn{
@@ -594,6 +598,97 @@
     line-height:1.8;
   }
 
+
+  .fixed-list{
+    display:grid;
+    gap:10px;
+    max-height:45vh;
+    overflow:auto;
+    margin-top:10px;
+  }
+
+  .fixed-card{
+    border:1px solid #eadcc7;
+    border-radius:16px;
+    padding:12px;
+    background:white;
+  }
+
+  .fixed-card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+
+  .fixed-card-name{
+    font-weight:900;
+  }
+
+  .fixed-card-amount{
+    font-weight:900;
+  }
+
+  .fixed-card-note{
+    margin-top:4px;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  .fixed-actions{
+    display:flex;
+    gap:12px;
+    margin-top:10px;
+  }
+
+  .fixed-badge{
+    display:inline-block;
+    margin-left:5px;
+    color:var(--green);
+    font-size:12px;
+    font-weight:900;
+  }
+
+
+  .home-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .more-row{
+    margin-top:12px;
+  }
+
+  .more-row .btn{
+    width:100%;
+  }
+
+  .more-menu{
+    display:grid;
+    gap:10px;
+    margin-top:8px;
+  }
+
+  .more-menu .btn{
+    width:100%;
+    text-align:left;
+    padding-left:16px;
+  }
+
+  .danger-zone{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+  }
+
+  .danger-title{
+    margin:0 0 10px;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:800;
+  }
+
 </style>
 </head>
 <body>
@@ -614,7 +709,6 @@
 
     <div class="month-picker-wrap">
       <button class="month-picker-open" id="openMonthPicker">📅 選擇年月</button>
-      <button class="month-picker-open" id="openYearView">📊 看整年度</button>
     </div>
 
     <div class="summary">
@@ -636,27 +730,17 @@
   <div class="card">
     <div class="section-head">
       <h2 class="section-title">本月繳費 🧾</h2>
-      <button class="edit-toggle" id="editModeBtn">✏️ 編輯</button>
     </div>
     <div id="items"></div>
   </div>
 
-  <div class="actions">
+  <div class="home-actions">
     <button class="btn btn-primary" id="addBtn">＋ 新增繳費</button>
     <button class="btn btn-secondary" id="favoritesBtn">⭐ 常用項目</button>
   </div>
 
-  <div class="import-row">
-    <button class="btn btn-import" id="importNotesBtn">📥 匯入備忘錄</button>
-  </div>
-
-  <div class="actions" style="margin-top:12px;">
-    <button class="btn btn-secondary" id="clearMonthBtn">🗑️ 清空本月</button>
-    <button class="btn btn-secondary" id="clearYearBtn">🗑️ 清空整年度</button>
-  </div>
-
-  <div class="import-row">
-    <button class="btn btn-import" id="restoreBackupBtn">↩️ 還原上一次備份</button>
+  <div class="more-row">
+    <button class="btn btn-secondary" id="moreBtn">☰ 更多功能</button>
   </div>
 
   <div class="tip">
@@ -664,6 +748,76 @@
     每個月份的資料會分開保存。
   </div>
 </div>
+
+
+
+<dialog id="moreDialog">
+  <div class="dialog-body">
+    <h2>☰ 更多功能</h2>
+
+    <div class="more-menu">
+      <button class="btn btn-secondary" type="button" id="moreYearView">📊 看整年度</button>
+      <button class="btn btn-secondary" type="button" id="moreFixed">🔁 固定繳費</button>
+      <button class="btn btn-secondary" type="button" id="moreImport">📥 匯入備忘錄</button>
+      <button class="btn btn-secondary" type="button" id="moreEdit">✏️ 編輯本月資料</button>
+      <button class="btn btn-secondary" type="button" id="moreRestore">↩️ 還原上一次備份</button>
+    </div>
+
+    <div class="danger-zone">
+      <div class="danger-title">資料管理</div>
+      <div class="more-menu">
+        <button class="btn btn-secondary" type="button" id="moreClearMonth">🗑️ 清空本月</button>
+        <button class="btn btn-secondary" type="button" id="moreClearYear">🗑️ 清空整年度</button>
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button class="btn btn-primary" type="button" id="closeMore">完成</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="fixedDialog">
+  <div class="dialog-body">
+    <h2>🔁 固定繳費</h2>
+    <div class="import-help">
+      設定一次後，打開新的月份時會自動加入，而且新月份會重新變成「待繳」。
+    </div>
+
+    <button class="btn btn-primary" type="button" id="newFixedBtn" style="width:100%;">＋ 新增固定繳費</button>
+    <div id="fixedList" class="fixed-list"></div>
+
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" type="button" id="closeFixed">完成</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="fixedEditDialog">
+  <form class="dialog-body" id="fixedForm">
+    <h2 id="fixedFormTitle">新增固定繳費</h2>
+
+    <div class="field">
+      <label for="fixedName">項目名稱</label>
+      <input id="fixedName" autocomplete="off" required>
+    </div>
+
+    <div class="field">
+      <label for="fixedAmount">金額</label>
+      <input id="fixedAmount" type="number" inputmode="numeric" min="0" required>
+    </div>
+
+    <div class="field">
+      <label for="fixedNote">備註（可不填）</label>
+      <input id="fixedNote" autocomplete="off">
+    </div>
+
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" type="button" id="cancelFixedEdit">取消</button>
+      <button class="btn btn-primary" type="submit">儲存</button>
+    </div>
+  </form>
+</dialog>
 
 <dialog id="importDialog">
   <div class="dialog-body">
@@ -1016,6 +1170,7 @@ function importParsedNotes(parsed){
 const MONTHS_KEY = 'bear-money-book-months-v1';
 const FAVORITES_KEY = 'bear-money-book-favorites-v1';
 const BACKUP_KEY = 'bear-money-book-last-backup-v1';
+const FIXED_KEY = 'bear-money-book-fixed-v1';
 
 let current = { year: 2026, month: 8 };
 
@@ -1059,12 +1214,53 @@ function setCurrentItems(items){
 }
 
 
+
+function loadFixed(){
+  try{
+    return JSON.parse(localStorage.getItem(FIXED_KEY)) || [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveFixed(list){
+  localStorage.setItem(FIXED_KEY, JSON.stringify(list));
+}
+
+function ensureFixedForCurrentMonth(){
+  const fixed = loadFixed().filter(x => x.active !== false);
+  if(fixed.length === 0) return;
+
+  const items = getCurrentItems();
+  let changed = false;
+
+  fixed.forEach(f => {
+    // sourceFixedId prevents the same recurring bill from being created twice in one month.
+    const exists = items.some(item => item.sourceFixedId === f.id);
+    if(exists) return;
+
+    items.push({
+      id:Date.now().toString() + Math.random().toString(16).slice(2),
+      name:f.name,
+      amount:Number(f.amount || 0),
+      note:f.note || '',
+      paid:false,
+      favorite:false,
+      sourceFixedId:f.id
+    });
+    changed = true;
+  });
+
+  if(changed) setCurrentItems(items);
+}
+
 function createBackup(reason){
   const snapshot = {
     reason,
     time:new Date().toISOString(),
     months:loadAllMonths(),
-    favorites:loadFavorites()
+    favorites:loadFavorites(),
+    fixed:loadFixed()
   };
   localStorage.setItem(BACKUP_KEY, JSON.stringify(snapshot));
 }
@@ -1093,11 +1289,13 @@ function restoreBackup(){
     reason:'還原前自動備份',
     time:new Date().toISOString(),
     months:loadAllMonths(),
-    favorites:loadFavorites()
+    favorites:loadFavorites(),
+    fixed:loadFixed()
   };
 
   localStorage.setItem(MONTHS_KEY, JSON.stringify(backup.months || {}));
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(backup.favorites || []));
+  if(backup.fixed) localStorage.setItem(FIXED_KEY, JSON.stringify(backup.fixed));
 
   // The state from before restore becomes the new "last backup".
   localStorage.setItem(BACKUP_KEY, JSON.stringify(currentSnapshot));
@@ -1116,6 +1314,7 @@ function renderMonthTitle(){
 
 function render(){
   renderMonthTitle();
+  ensureFixedForCurrentMonth();
 
   const items = getCurrentItems();
   const wrap = document.getElementById('items');
@@ -1142,6 +1341,7 @@ function render(){
         <div class="name-line">
           <span class="name"></span>
           ${item.favorite ? '<span class="fav-mark">★</span>' : ''}
+          ${item.sourceFixedId ? '<span class="fixed-badge">🔁</span>' : ''}
         </div>
         ${item.note ? '<span class="meta"></span>' : ''}
         <div class="row-actions view-only-actions">
@@ -1527,11 +1727,6 @@ function renderYearView(year){
   `;
 }
 
-document.getElementById('openYearView').addEventListener('click', () => {
-  renderYearView(current.year);
-  yearViewDialog.showModal();
-});
-
 document.getElementById('closeYearView').addEventListener('click', () => {
   yearViewDialog.close();
 });
@@ -1539,12 +1734,6 @@ document.getElementById('closeYearView').addEventListener('click', () => {
 
 const importDialog = document.getElementById('importDialog');
 const importPreviewDialog = document.getElementById('importPreviewDialog');
-
-document.getElementById('importNotesBtn').addEventListener('click', () => {
-  document.getElementById('importText').value = '';
-  pendingImport = null;
-  importDialog.showModal();
-});
 
 document.getElementById('cancelImport').addEventListener('click', () => {
   importDialog.close();
@@ -1596,17 +1785,13 @@ document.getElementById('confirmImport').addEventListener('click', () => {
 
 let editMode = false;
 
-document.getElementById('editModeBtn').addEventListener('click', () => {
-  editMode = !editMode;
+function setEditMode(on){
+  editMode = on;
   document.body.classList.toggle('edit-mode', editMode);
-
-  const btn = document.getElementById('editModeBtn');
-  btn.classList.toggle('active', editMode);
-  btn.textContent = editMode ? '✅ 完成' : '✏️ 編輯';
-});
+}
 
 
-document.getElementById('clearMonthBtn').addEventListener('click', () => {
+function clearCurrentMonth(){
   const items = getCurrentItems();
 
   if(items.length === 0){
@@ -1625,9 +1810,9 @@ document.getElementById('clearMonthBtn').addEventListener('click', () => {
   saveAllMonths(all);
   render();
   alert(`${label} 已清空。需要時可以按「↩️ 還原上一次備份」。`);
-});
+}
 
-document.getElementById('clearYearBtn').addEventListener('click', () => {
+function clearCurrentYear(){
   const year = current.year;
   const all = loadAllMonths();
   const keys = Object.keys(all).filter(key => key.startsWith(`${year}-`));
@@ -1647,9 +1832,184 @@ document.getElementById('clearYearBtn').addEventListener('click', () => {
   saveAllMonths(all);
   render();
   alert(`${year} 年已清空，可以重新匯入整年度備忘錄。`);
+}
+
+
+
+const fixedDialog = document.getElementById('fixedDialog');
+const fixedEditDialog = document.getElementById('fixedEditDialog');
+const fixedForm = document.getElementById('fixedForm');
+let editingFixedId = null;
+
+function renderFixedList(){
+  const wrap = document.getElementById('fixedList');
+  const list = loadFixed();
+  wrap.innerHTML = '';
+
+  if(list.length === 0){
+    wrap.innerHTML = '<div class="empty">還沒有固定繳費項目 🔁</div>';
+    return;
+  }
+
+  list.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'fixed-card';
+    card.innerHTML = `
+      <div class="fixed-card-top">
+        <div class="fixed-card-name"></div>
+        <div class="fixed-card-amount">${money(f.amount)}</div>
+      </div>
+      ${f.note ? '<div class="fixed-card-note"></div>' : ''}
+      <div class="fixed-actions">
+        <button class="tiny-btn edit-fixed" type="button">修改</button>
+        <button class="tiny-btn toggle-fixed" type="button">${f.active === false ? '重新啟用' : '停止自動加入'}</button>
+        <button class="tiny-btn delete-fixed" type="button">刪除設定</button>
+      </div>
+    `;
+    card.querySelector('.fixed-card-name').textContent = f.name;
+    const note = card.querySelector('.fixed-card-note');
+    if(note) note.textContent = f.note;
+
+    card.querySelector('.edit-fixed').addEventListener('click', () => {
+      editingFixedId = f.id;
+      document.getElementById('fixedFormTitle').textContent = '修改固定繳費';
+      document.getElementById('fixedName').value = f.name;
+      document.getElementById('fixedAmount').value = f.amount;
+      document.getElementById('fixedNote').value = f.note || '';
+      fixedEditDialog.showModal();
+    });
+
+    card.querySelector('.toggle-fixed').addEventListener('click', () => {
+      const next = loadFixed();
+      const target = next.find(x => x.id === f.id);
+      if(target){
+        target.active = target.active === false ? true : false;
+        saveFixed(next);
+        renderFixedList();
+      }
+    });
+
+    card.querySelector('.delete-fixed').addEventListener('click', () => {
+      if(confirm(`刪除固定設定「${f.name}」嗎？\n已經存在各月份的舊帳不會被刪除。`)){
+        createBackup(`刪除固定繳費設定 ${f.name}`);
+        saveFixed(loadFixed().filter(x => x.id !== f.id));
+        renderFixedList();
+      }
+    });
+
+    wrap.appendChild(card);
+  });
+}
+
+document.getElementById('closeFixed').addEventListener('click', () => {
+  fixedDialog.close();
+  render();
 });
 
-document.getElementById('restoreBackupBtn').addEventListener('click', restoreBackup);
+document.getElementById('newFixedBtn').addEventListener('click', () => {
+  editingFixedId = null;
+  fixedForm.reset();
+  document.getElementById('fixedFormTitle').textContent = '新增固定繳費';
+  fixedEditDialog.showModal();
+});
+
+document.getElementById('cancelFixedEdit').addEventListener('click', () => {
+  fixedEditDialog.close();
+});
+
+fixedForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById('fixedName').value.trim();
+  const amount = Number(document.getElementById('fixedAmount').value) || 0;
+  const note = document.getElementById('fixedNote').value.trim();
+
+  if(!name) return;
+
+  createBackup(editingFixedId ? '修改固定繳費前' : '新增固定繳費前');
+  const list = loadFixed();
+
+  if(editingFixedId){
+    const target = list.find(x => x.id === editingFixedId);
+    if(target){
+      target.name = name;
+      target.amount = amount;
+      target.note = note;
+    }
+  }else{
+    list.push({
+      id:Date.now().toString(),
+      name,
+      amount,
+      note,
+      active:true
+    });
+  }
+
+  saveFixed(list);
+  fixedEditDialog.close();
+  renderFixedList();
+
+  // Newly-created fixed items also appear immediately in the current month.
+  ensureFixedForCurrentMonth();
+  render();
+});
+
+
+const moreDialog = document.getElementById('moreDialog');
+
+document.getElementById('moreBtn').addEventListener('click', () => {
+  document.getElementById('moreEdit').textContent =
+    editMode ? '✅ 完成編輯' : '✏️ 編輯本月資料';
+  moreDialog.showModal();
+});
+
+document.getElementById('closeMore').addEventListener('click', () => {
+  moreDialog.close();
+});
+
+document.getElementById('moreYearView').addEventListener('click', () => {
+  moreDialog.close();
+  renderYearView(current.year);
+  yearViewDialog.showModal();
+});
+
+document.getElementById('moreFixed').addEventListener('click', () => {
+  moreDialog.close();
+  renderFixedList();
+  fixedDialog.showModal();
+});
+
+document.getElementById('moreImport').addEventListener('click', () => {
+  moreDialog.close();
+  document.getElementById('importText').value = '';
+  pendingImport = null;
+  importDialog.showModal();
+});
+
+document.getElementById('moreEdit').addEventListener('click', () => {
+  const next = !editMode;
+  moreDialog.close();
+  setEditMode(next);
+  if(next){
+    alert('已進入編輯模式。修改完成後，到「☰ 更多功能」點「✅ 完成編輯」。');
+  }
+});
+
+document.getElementById('moreRestore').addEventListener('click', () => {
+  moreDialog.close();
+  restoreBackup();
+});
+
+document.getElementById('moreClearMonth').addEventListener('click', () => {
+  moreDialog.close();
+  clearCurrentMonth();
+});
+
+document.getElementById('moreClearYear').addEventListener('click', () => {
+  moreDialog.close();
+  clearCurrentYear();
+});
 
 render();
 </script>
