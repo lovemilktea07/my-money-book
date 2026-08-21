@@ -313,6 +313,92 @@
     line-height:1.6;
   }
 
+  .import-row{
+    margin-top:12px;
+  }
+
+  .btn-import{
+    width:100%;
+    background:#f3e7d5;
+    color:var(--text);
+  }
+
+  .import-textarea{
+    width:100%;
+    min-height:220px;
+    resize:vertical;
+    border:1px solid #dfcfba;
+    border-radius:16px;
+    padding:14px;
+    outline:none;
+    background:white;
+    color:var(--text);
+    font:inherit;
+    line-height:1.6;
+  }
+
+  .import-help{
+    margin:8px 0 14px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.6;
+  }
+
+  .import-summary{
+    margin:12px 0;
+    padding:12px 14px;
+    border-radius:14px;
+    background:#f8efe3;
+    color:var(--text);
+    font-size:13px;
+    line-height:1.6;
+  }
+
+  .preview-list{
+    max-height:42vh;
+    overflow:auto;
+    display:grid;
+    gap:10px;
+    margin:12px 0 4px;
+  }
+
+  .preview-month{
+    font-weight:900;
+    margin-top:6px;
+    color:var(--brown);
+  }
+
+  .preview-item{
+    display:grid;
+    grid-template-columns:24px minmax(0,1fr) auto;
+    gap:8px;
+    align-items:start;
+    border:1px solid #eadcc7;
+    border-radius:14px;
+    padding:10px 12px;
+    background:white;
+  }
+
+  .preview-status{
+    font-size:16px;
+    line-height:1.4;
+  }
+
+  .preview-name{
+    font-weight:800;
+  }
+
+  .preview-note{
+    margin-top:2px;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  .preview-amount{
+    font-weight:800;
+    white-space:nowrap;
+  }
+
   dialog{
     width:min(92vw,420px);
     border:0;
@@ -458,11 +544,45 @@
     <button class="btn btn-secondary" id="favoritesBtn">⭐ 常用項目</button>
   </div>
 
+  <div class="import-row">
+    <button class="btn btn-import" id="importNotesBtn">📥 匯入備忘錄</button>
+  </div>
+
   <div class="tip">
     新增、修改金額、勾選已繳、刪除、加入常用都會自動儲存。<br>
     每個月份的資料會分開保存。
   </div>
 </div>
+
+<dialog id="importDialog">
+  <div class="dialog-body">
+    <h2>📥 匯入備忘錄</h2>
+    <div class="import-help">
+      把「一整年」的備忘錄內容複製後貼在下面。<br>
+      例如 114 年會自動換算成 2025 年，並依「1月繳費、2月繳費…」分開匯入。
+    </div>
+
+    <textarea id="importText" class="import-textarea" placeholder=""></textarea>
+
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" type="button" id="cancelImport">取消</button>
+      <button class="btn btn-primary" type="button" id="previewImport">辨識預覽</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="importPreviewDialog">
+  <div class="dialog-body">
+    <h2>🔎 匯入預覽</h2>
+    <div id="importSummary" class="import-summary"></div>
+    <div id="importPreviewList" class="preview-list"></div>
+
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" type="button" id="backToImport">返回修改</button>
+      <button class="btn btn-primary" type="button" id="confirmImport">確認匯入</button>
+    </div>
+  </div>
+</dialog>
 
 <dialog id="monthPickerDialog">
   <div class="dialog-body">
@@ -546,6 +666,230 @@
 </dialog>
 
 <script>
+
+let pendingImport = null;
+
+function normalizeImportLine(line){
+  return line
+    .replace(/\u00a0/g, ' ')
+    .replace(/[　\t]+/g, ' ')
+    .trim();
+}
+
+function rocToAdYear(y){
+  y = Number(y);
+  if(!Number.isFinite(y)) return null;
+  if(y >= 1 && y <= 200) return y + 1911;
+  if(y >= 1900 && y <= 2200) return y;
+  return null;
+}
+
+function parseYearFromText(text){
+  const m = text.match(/(?:^|\s|[🐍🐉🐇🐅🐲])\s*(\d{2,4})\s*年(?:度)?/m);
+  return m ? rocToAdYear(m[1]) : null;
+}
+
+function extractInstallmentNote(line){
+  const m = line.match(/[（(]\s*([^()（）]{1,30})\s*[）)]\s*$/);
+  return m ? m[1].trim() : '';
+}
+
+function cleanImportName(line, amountText){
+  let s = line;
+
+  // remove common checked symbols / bullets / decorative prefixes
+  s = s.replace(/^[\s☑✅✔︎✔️☐□▣◼︎◻︎🔲]+/u, '');
+  s = s.replace(/^[💔❤️🧾💳⬇️⭐🌼🐻📶🏠🛡️]+\s*/u, '');
+
+  // remove trailing installment note
+  s = s.replace(/[（(][^()（）]{1,30}[）)]\s*$/, '');
+
+  // remove the detected amount and surrounding separators
+  if(amountText){
+    const idx = s.lastIndexOf(amountText);
+    if(idx >= 0) s = s.slice(0, idx);
+  }
+
+  s = s.replace(/[：:－—–\-]\s*$/u, '');
+  s = s.replace(/[：:－—–\-]\s*$/u, '');
+  s = s.trim();
+
+  return s;
+}
+
+function parseNotesImport(text){
+  const year = parseYearFromText(text);
+  if(!year){
+    return { error:'找不到年份。請確認內容裡有像「114年」或「113年度」的文字。' };
+  }
+
+  const lines = text.split(/\r?\n/).map(normalizeImportLine);
+  let month = null;
+  let groupPaid = false;
+  let groupName = '';
+  const found = [];
+
+  for(const raw of lines){
+    if(!raw) continue;
+
+    // Skip standalone year/decorative title lines.
+    if(/^\D*\d{2,4}\s*年(?:度)?\D*$/u.test(raw) && !/月/.test(raw)) continue;
+
+    // Month header, e.g. "💔1月繳費"
+    const mm = raw.match(/(?:^|\D)(1[0-2]|0?[1-9])\s*月\s*(?:繳費|帳單|支出)?/u);
+    if(mm){
+      month = Number(mm[1]);
+      groupPaid = false;
+      groupName = '';
+      continue;
+    }
+
+    if(!month) continue;
+
+    const explicitlyPaid = /^[\s]*[☑✅✔︎✔️]/u.test(raw);
+
+    // Locate the last plausible money amount in the line.
+    // We deliberately ignore numbers inside the trailing installment note.
+    const withoutNote = raw.replace(/[（(][^()（）]{1,30}[）)]\s*$/, '');
+    const nums = [...withoutNote.matchAll(/(\d[\d,]*)/g)];
+    let amountMatch = null;
+    if(nums.length){
+      amountMatch = nums[nums.length - 1];
+    }
+
+    if(!amountMatch){
+      // A checked line without money is treated as a group header.
+      // Its children inherit the checked state.
+      const cleanedGroup = cleanImportName(raw, '');
+      if(cleanedGroup){
+        groupPaid = explicitlyPaid;
+        groupName = cleanedGroup.replace(/[⬇️↓]+$/u,'').trim();
+      }
+      continue;
+    }
+
+    const amountText = amountMatch[1];
+    const amount = Number(amountText.replace(/,/g,''));
+    if(!Number.isFinite(amount)) continue;
+
+    const name = cleanImportName(raw, amountText);
+    if(!name) continue;
+
+    const installment = extractInstallmentNote(raw);
+    const noteParts = [];
+    if(installment) noteParts.push(installment);
+
+    // Only keep a group as a note when it adds useful context and is not redundant.
+    if(groupName && !name.includes(groupName) && !groupName.includes(name)){
+      if(/信用卡|銀行|分期|貸款/u.test(groupName)) noteParts.push(groupName);
+    }
+
+    found.push({
+      year,
+      month,
+      name,
+      amount,
+      note: noteParts.join(' · '),
+      paid: explicitlyPaid || groupPaid,
+      favorite:false
+    });
+  }
+
+  if(found.length === 0){
+    return { error:'有找到年份和月份，但沒有辨識到「項目＋金額」。請把備忘錄內容完整貼上再試一次。' };
+  }
+
+  return { year, items:found };
+}
+
+function groupImportByMonth(parsed){
+  const grouped = {};
+  parsed.items.forEach(item => {
+    const key = monthKey(item.year, item.month);
+    if(!grouped[key]) grouped[key] = [];
+    grouped[key].push(item);
+  });
+  return grouped;
+}
+
+function renderImportPreview(parsed){
+  const grouped = groupImportByMonth(parsed);
+  const keys = Object.keys(grouped).sort();
+
+  const paidCount = parsed.items.filter(x => x.paid).length;
+  document.getElementById('importSummary').textContent =
+    `辨識到 ${parsed.year} 年，共 ${keys.length} 個月份、${parsed.items.length} 筆項目；其中 ${paidCount} 筆標記為已繳。`;
+
+  const wrap = document.getElementById('importPreviewList');
+  wrap.innerHTML = '';
+
+  keys.forEach(key => {
+    const [y,m] = key.split('-').map(Number);
+    const title = document.createElement('div');
+    title.className = 'preview-month';
+    title.textContent = `${y} 年 ${m} 月`;
+    wrap.appendChild(title);
+
+    grouped[key].forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'preview-item';
+      row.innerHTML = `
+        <div class="preview-status">${item.paid ? '✅' : '⬜️'}</div>
+        <div>
+          <div class="preview-name"></div>
+          ${item.note ? '<div class="preview-note"></div>' : ''}
+        </div>
+        <div class="preview-amount">${money(item.amount)}</div>
+      `;
+      row.querySelector('.preview-name').textContent = item.name;
+      const note = row.querySelector('.preview-note');
+      if(note) note.textContent = item.note;
+      wrap.appendChild(row);
+    });
+  });
+}
+
+function importParsedNotes(parsed){
+  const all = loadAllMonths();
+  const grouped = groupImportByMonth(parsed);
+  let added = 0;
+  let skipped = 0;
+
+  Object.entries(grouped).forEach(([key, incoming]) => {
+    const existing = all[key] || [];
+
+    incoming.forEach(item => {
+      // Basic duplicate protection: same name + amount + note in same month.
+      const duplicate = existing.some(x =>
+        String(x.name).trim() === String(item.name).trim() &&
+        Number(x.amount || 0) === Number(item.amount || 0) &&
+        String(x.note || '').trim() === String(item.note || '').trim()
+      );
+
+      if(duplicate){
+        skipped++;
+        return;
+      }
+
+      existing.push({
+        id: Date.now().toString() + Math.random().toString(16).slice(2),
+        name:item.name,
+        amount:item.amount,
+        note:item.note || '',
+        paid:!!item.paid,
+        favorite:false
+      });
+      added++;
+    });
+
+    all[key] = existing;
+  });
+
+  saveAllMonths(all);
+  return {added, skipped};
+}
+
+
 const MONTHS_KEY = 'bear-money-book-months-v1';
 const FAVORITES_KEY = 'bear-money-book-favorites-v1';
 
@@ -887,6 +1231,62 @@ document.getElementById('confirmMonthPicker').addEventListener('click', () => {
   monthPickerDialog.close();
   render();
 });
+
+
+const importDialog = document.getElementById('importDialog');
+const importPreviewDialog = document.getElementById('importPreviewDialog');
+
+document.getElementById('importNotesBtn').addEventListener('click', () => {
+  document.getElementById('importText').value = '';
+  pendingImport = null;
+  importDialog.showModal();
+});
+
+document.getElementById('cancelImport').addEventListener('click', () => {
+  importDialog.close();
+});
+
+document.getElementById('previewImport').addEventListener('click', () => {
+  const text = document.getElementById('importText').value.trim();
+  if(!text){
+    alert('請先把備忘錄內容貼進來');
+    return;
+  }
+
+  const parsed = parseNotesImport(text);
+  if(parsed.error){
+    alert(parsed.error);
+    return;
+  }
+
+  pendingImport = parsed;
+  renderImportPreview(parsed);
+  importDialog.close();
+  importPreviewDialog.showModal();
+});
+
+document.getElementById('backToImport').addEventListener('click', () => {
+  importPreviewDialog.close();
+  importDialog.showModal();
+});
+
+document.getElementById('confirmImport').addEventListener('click', () => {
+  if(!pendingImport) return;
+
+  const result = importParsedNotes(pendingImport);
+  importPreviewDialog.close();
+
+  current.year = pendingImport.year;
+  current.month = pendingImport.items[0].month;
+  render();
+
+  let msg = `完成！已匯入 ${result.added} 筆資料。`;
+  if(result.skipped) msg += `\n另外略過 ${result.skipped} 筆看起來重複的資料。`;
+  alert(msg);
+
+  pendingImport = null;
+});
+
 
 render();
 </script>
