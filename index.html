@@ -1447,6 +1447,38 @@
     line-height:1.45;
   }
 
+
+  /* ===== 長備註編輯：真正換行並使用整列寬度 ===== */
+  .item.editing-text .item-main{
+    grid-column:2 / 4;
+    width:100%;
+    min-width:0;
+  }
+
+  .item.editing-text .price-wrap{
+    display:none !important;
+  }
+
+  .item.editing-text .edit-note{
+    width:100% !important;
+    min-width:0 !important;
+    min-height:64px !important;
+    max-height:220px !important;
+    box-sizing:border-box !important;
+    white-space:pre-wrap !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
+    overflow-x:hidden !important;
+    overflow-y:auto !important;
+    resize:none !important;
+    line-height:1.45 !important;
+  }
+
+  .item.editing-text .edit-name{
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+
 </style>
 </head>
 <body>
@@ -2223,13 +2255,14 @@ function render(){
     const del = row.querySelector('.delete-btn');
 
     editItemBtn.addEventListener('click', () => {
+      row.classList.add('editing-text');
       const main = row.querySelector('.item-main');
       const currentName = item.name || '';
       const currentNote = item.note || '';
 
       main.innerHTML = `
         <input class="edit-input edit-name" type="text">
-        <textarea class="edit-input edit-note" rows="2"></textarea>
+        <textarea class="edit-input edit-note" rows="2" wrap="soft"></textarea>
         <div class="row-actions">
           <button class="tiny-btn save-text-btn" type="button">儲存文字</button>
           <button class="tiny-btn cancel-text-btn" type="button">取消</button>
