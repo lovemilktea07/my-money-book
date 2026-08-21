@@ -1430,8 +1430,8 @@ function fillYearOptions(){
   const select = document.getElementById('pickYear');
   select.innerHTML = '';
 
-  // 2011–2040，包含目前年份；之後要再往前/往後也很好改。
-  for(let year = 2011; year <= 2040; year++){
+  // 年份從 2022 年開始。
+  for(let year = 2022; year <= 2040; year++){
     const option = document.createElement('option');
     option.value = year;
     option.textContent = `${year} 年`;
