@@ -1127,44 +1127,69 @@
   .bear-face .eye{position:absolute;width:.09em;height:.09em;border-radius:50%;background:#4b2d1c;top:34%}.bear-face .eye.left{left:25%}.bear-face .eye.right{right:25%}
   .hero-bear{font-size:30px;margin-left:4px}.mini-bear-icon{font-size:24px}.nav-bear-icon{font-size:54px;filter:drop-shadow(0 4px 4px rgba(95,55,24,.13))}
 
+
+  /* ===== 介面整理 ===== */
+  .title-row{flex-wrap:nowrap;gap:6px}
+  .title-edit-icon{
+    flex:0 0 auto;width:34px;height:34px;padding:0;
+    display:grid;place-items:center;background:transparent;
+    border:0;font-size:19px
+  }
+  .month-row-clean{
+    display:flex;align-items:center;justify-content:space-between;gap:10px
+  }
+  .month-select-left{
+    flex:1 1 auto;justify-content:flex-start;padding:0 8px;min-width:0
+  }
+  .month-select-left .month-title{text-align:left}
+  .month-switch-right{
+    flex:0 0 auto;display:flex;align-items:center;gap:7px
+  }
+  .month-switch-right .month-btn{
+    width:42px;height:42px;flex:0 0 42px
+  }
+  .summary-box{padding-bottom:14px}
+
 </style>
 </head>
 <body>
 <div class="app-shell">
   <header class="hero" id="monthlyHero">
     <div class="hero-copy">
-      <div class="title-row"><div class="hero-title" id="bookTitle">拉拉熊記帳本</div><span class="bear-face hero-bear" aria-hidden="true"><i class="eye left"></i><i class="eye right"></i><i class="muzzle"></i></span><button class="title-edit-btn" id="editTitleBtn" type="button">✏️ 名稱</button></div>
+      <div class="title-row"><div class="hero-title" id="bookTitle">拉拉熊記帳本</div><button class="title-edit-btn title-edit-icon" id="editTitleBtn" type="button" aria-label="修改記帳本名稱" title="修改名稱">✏️</button></div>
       <div class="hero-subtitle">用心記錄每一筆，<br>讓生活更安心 ♡</div>
     </div>
   </header>
 
   <main class="container">
     <section class="card month-summary-card">
-      <div class="month-row concept-month-row">
-        <button class="month-btn" id="prevMonth" aria-label="上個月">‹</button>
-        <button class="concept-month-label" id="openMonthPicker">
+      <div class="month-row concept-month-row month-row-clean">
+        <button class="concept-month-label month-select-left" id="openMonthPicker">
           <span class="calendar-icon">📅</span>
           <span class="month-title" id="monthTitle"></span>
           <span class="down-arrow">⌄</span>
         </button>
-        <button class="month-btn" id="nextMonth" aria-label="下個月">›</button>
+        <div class="month-switch-right" aria-label="切換月份">
+          <button class="month-btn" id="prevMonth" aria-label="上個月">‹</button>
+          <button class="month-btn" id="nextMonth" aria-label="下個月">›</button>
+        </div>
       </div>
 
       <div class="summary concept-summary">
         <div class="summary-box">
           <div class="summary-label">本月總金額</div>
           <div class="amount total-amount" id="total">$0</div>
-          <div class="summary-deco">👛</div>
+          
         </div>
         <div class="summary-box">
           <div class="summary-label">已繳金額</div>
           <div class="amount paid" id="paid">$0</div>
-          <div class="summary-deco">✅</div>
+          
         </div>
         <div class="summary-box">
           <div class="summary-label">待繳金額</div>
           <div class="amount unpaid" id="unpaid">$0</div>
-          <div class="summary-deco">🕘</div>
+          
         </div>
       </div>
     </section>
