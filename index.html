@@ -1115,13 +1115,25 @@
     }
   }
 
+  /* ===== 可自訂名稱＋清晰熊熊圖示 ===== */
+  .title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .title-edit-btn{border:1px solid #ead6bb;background:rgba(255,250,241,.9);color:#76553b;border-radius:12px;padding:6px 9px;font-size:14px;font-weight:800}
+  .bear-face{display:inline-block;width:1em;height:1em;position:relative;border-radius:50%;background:#b9793f;border:2px solid #704526;vertical-align:-.12em;box-sizing:border-box}
+  .bear-face::before,.bear-face::after{content:"";position:absolute;width:.36em;height:.36em;border-radius:50%;background:#b9793f;border:2px solid #704526;top:-.22em;z-index:-1}
+  .bear-face::before{left:-.12em}.bear-face::after{right:-.12em}
+  .bear-face .muzzle{position:absolute;width:.52em;height:.42em;border-radius:50%;background:#fff7e8;left:50%;top:48%;transform:translate(-50%,-50%)}
+  .bear-face .muzzle::before{content:"";position:absolute;width:.11em;height:.09em;border-radius:50%;background:#5a351f;left:50%;top:31%;transform:translateX(-50%)}
+  .bear-face .muzzle::after{content:"";position:absolute;width:.18em;height:.09em;border-bottom:2px solid #5a351f;border-radius:0 0 50% 50%;left:50%;top:49%;transform:translateX(-50%)}
+  .bear-face .eye{position:absolute;width:.09em;height:.09em;border-radius:50%;background:#4b2d1c;top:34%}.bear-face .eye.left{left:25%}.bear-face .eye.right{right:25%}
+  .hero-bear{font-size:30px;margin-left:4px}.mini-bear-icon{font-size:24px}.nav-bear-icon{font-size:54px;filter:drop-shadow(0 4px 4px rgba(95,55,24,.13))}
+
 </style>
 </head>
 <body>
 <div class="app-shell">
   <header class="hero" id="monthlyHero">
     <div class="hero-copy">
-      <div class="hero-title">拉拉熊記帳本 🐻💕</div>
+      <div class="title-row"><div class="hero-title" id="bookTitle">拉拉熊記帳本</div><span class="bear-face hero-bear" aria-hidden="true"><i class="eye left"></i><i class="eye right"></i><i class="muzzle"></i></span><button class="title-edit-btn" id="editTitleBtn" type="button">✏️ 名稱</button></div>
       <div class="hero-subtitle">用心記錄每一筆，<br>讓生活更安心 ♡</div>
     </div>
   </header>
@@ -1169,12 +1181,12 @@
       <button class="concept-action-btn primary-action" id="addBtn">
         <span class="concept-action-icon">＋</span>
         <span>記一筆支出</span>
-        <span class="mini-bear">🐻</span>
+        <span class="bear-face mini-bear-icon" aria-hidden="true"><i class="eye left"></i><i class="eye right"></i><i class="muzzle"></i></span>
       </button>
       <button class="concept-action-btn secondary-action" id="statsBtn">
         <span class="concept-action-icon">◔</span>
         <span>查看統計</span>
-        <span class="mini-bear">🐻‍❄️</span>
+        <span class="bear-face mini-bear-icon" aria-hidden="true"><i class="eye left"></i><i class="eye right"></i><i class="muzzle"></i></span>
       </button>
     </section>
 
@@ -1191,7 +1203,7 @@
       <span class="nav-icon">☷</span><span>所有紀錄</span>
     </button>
     <button class="bottom-nav-btn center-bear" id="favoritesBtn" aria-label="常用項目">
-      <span class="big-bear">🐻</span>
+      <span class="bear-face nav-bear-icon" aria-hidden="true"><i class="eye left"></i><i class="eye right"></i><i class="muzzle"></i></span>
     </button>
     <button class="bottom-nav-btn" id="navCalendar">
       <span class="nav-icon">📅</span><span>行事曆</span>
@@ -1390,6 +1402,16 @@
       <button class="btn btn-primary" type="button" id="addSelectedFavorites">加入本月</button>
     </div>
   </div>
+</dialog>
+
+
+<dialog id="titleDialog">
+  <form class="dialog-body" id="titleForm">
+    <h2>✏️ 修改記帳本名稱</h2>
+    <div class="field"><label for="titleInput">記帳本名稱</label><input id="titleInput" maxlength="24" autocomplete="off" required></div>
+    <div class="import-help">修改後會自動儲存在這支手機裡。</div>
+    <div class="dialog-actions"><button class="btn btn-secondary" type="button" id="cancelTitle">取消</button><button class="btn btn-primary" type="submit">儲存</button></div>
+  </form>
 </dialog>
 
 <script>
@@ -1644,6 +1666,10 @@ const MONTHS_KEY = 'bear-money-book-months-v1';
 const FAVORITES_KEY = 'bear-money-book-favorites-v1';
 const BACKUP_KEY = 'bear-money-book-last-backup-v1';
 const FIXED_KEY = 'bear-money-book-fixed-v1';
+const TITLE_KEY = 'bear-money-book-title-v1';
+
+function loadBookTitle(){ return localStorage.getItem(TITLE_KEY) || '拉拉熊記帳本'; }
+function renderBookTitle(){ const el=document.getElementById('bookTitle'); if(el) el.textContent=loadBookTitle(); document.title=loadBookTitle(); }
 
 let current = { year: 2026, month: 8 };
 
@@ -1787,6 +1813,7 @@ function renderMonthTitle(){
 }
 
 function render(){
+  renderBookTitle();
   renderMonthTitle();
   ensureFixedForCurrentMonth();
 
@@ -2508,6 +2535,23 @@ document.getElementById('navCalendar').addEventListener('click', () => {
 
 document.getElementById('navHome').addEventListener('click', () => {
   window.scrollTo({top:0, behavior:'smooth'});
+});
+
+
+const titleDialog = document.getElementById('titleDialog');
+document.getElementById('editTitleBtn').addEventListener('click', () => {
+  document.getElementById('titleInput').value = loadBookTitle();
+  titleDialog.showModal();
+  setTimeout(() => document.getElementById('titleInput').focus(), 50);
+});
+document.getElementById('cancelTitle').addEventListener('click', () => titleDialog.close());
+document.getElementById('titleForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const value = document.getElementById('titleInput').value.trim();
+  if(!value) return;
+  localStorage.setItem(TITLE_KEY, value);
+  renderBookTitle();
+  titleDialog.close();
 });
 
 render();
