@@ -539,6 +539,61 @@
     .amount{font-size:19px}
     .price-input{font-size:15px}
   }
+
+  .month-picker-wrap{
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .year-overview{
+    display:grid;
+    gap:10px;
+  }
+
+  .year-month-card{
+    border:1px solid #ead9c2;
+    border-radius:16px;
+    padding:14px;
+    background:#fffaf3;
+    cursor:pointer;
+  }
+
+  .year-month-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    font-weight:900;
+    color:var(--text);
+    margin-bottom:8px;
+  }
+
+  .year-month-stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    text-align:center;
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .year-month-stats strong{
+    display:block;
+    margin-top:3px;
+    color:var(--text);
+    font-size:15px;
+  }
+
+  .year-total-box{
+    margin:10px 0 16px;
+    padding:14px;
+    border-radius:16px;
+    background:#f5ead8;
+    color:var(--text);
+    font-weight:800;
+    line-height:1.8;
+  }
+
 </style>
 </head>
 <body>
@@ -559,6 +614,7 @@
 
     <div class="month-picker-wrap">
       <button class="month-picker-open" id="openMonthPicker">📅 選擇年月</button>
+      <button class="month-picker-open" id="openYearView">📊 看整年度</button>
     </div>
 
     <div class="summary">
@@ -637,7 +693,7 @@
     <div class="picker-grid">
       <div class="field">
         <label for="pickYear">年份</label>
-        <input id="pickYear" type="number" inputmode="numeric" min="2000" max="2100">
+        <select id="pickYear"></select>
       </div>
 
       <div class="field">
@@ -662,6 +718,18 @@
     <div class="dialog-actions">
       <button class="btn btn-secondary" type="button" id="cancelMonthPicker">取消</button>
       <button class="btn btn-primary" type="button" id="confirmMonthPicker">前往</button>
+    </div>
+  </div>
+</dialog>
+
+
+<dialog id="yearViewDialog">
+  <div class="dialog-body">
+    <h2 id="yearViewTitle">📊 整年度</h2>
+    <div id="yearViewSummary" class="import-summary"></div>
+    <div id="yearViewList" class="preview-list"></div>
+    <div class="dialog-actions">
+      <button class="btn btn-primary" type="button" id="closeYearView">完成</button>
     </div>
   </div>
 </dialog>
@@ -1296,6 +1364,21 @@ document.getElementById('nextMonth').addEventListener('click', () => shiftMonth(
 
 const monthPickerDialog = document.getElementById('monthPickerDialog');
 
+function fillYearOptions(){
+  const select = document.getElementById('pickYear');
+  select.innerHTML = '';
+
+  // 2011–2040，包含目前年份；之後要再往前/往後也很好改。
+  for(let year = 2011; year <= 2040; year++){
+    const option = document.createElement('option');
+    option.value = year;
+    option.textContent = `${year} 年`;
+    select.appendChild(option);
+  }
+}
+
+fillYearOptions();
+
 document.getElementById('openMonthPicker').addEventListener('click', () => {
   document.getElementById('pickYear').value = current.year;
   document.getElementById('pickMonth').value = current.month;
@@ -1311,7 +1394,7 @@ document.getElementById('confirmMonthPicker').addEventListener('click', () => {
   const month = Number(document.getElementById('pickMonth').value);
 
   if(year < 2000 || year > 2100 || month < 1 || month > 12){
-    alert('請輸入正確的年份與月份');
+    alert('請選擇正確的年份與月份');
     return;
   }
 
@@ -1319,6 +1402,76 @@ document.getElementById('confirmMonthPicker').addEventListener('click', () => {
   current.month = month;
   monthPickerDialog.close();
   render();
+});
+
+
+
+const yearViewDialog = document.getElementById('yearViewDialog');
+
+function renderYearView(year){
+  const all = loadAllMonths();
+  const list = document.getElementById('yearViewList');
+  const summary = document.getElementById('yearViewSummary');
+
+  document.getElementById('yearViewTitle').textContent = `📊 ${year} 年整年度`;
+  list.innerHTML = '';
+  list.className = 'year-overview';
+
+  let yearTotal = 0;
+  let yearPaid = 0;
+  let yearUnpaid = 0;
+
+  for(let month = 1; month <= 12; month++){
+    const items = all[monthKey(year, month)] || [];
+    const total = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const paid = items.filter(item => item.paid)
+      .reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const unpaid = total - paid;
+
+    yearTotal += total;
+    yearPaid += paid;
+    yearUnpaid += unpaid;
+
+    const card = document.createElement('div');
+    card.className = 'year-month-card';
+    card.innerHTML = `
+      <div class="year-month-top">
+        <span>🌼 ${month} 月</span>
+        <span>${items.length} 筆 ›</span>
+      </div>
+      <div class="year-month-stats">
+        <div>總額<strong>${money(total)}</strong></div>
+        <div>已繳<strong>${money(paid)}</strong></div>
+        <div>待繳<strong>${money(unpaid)}</strong></div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      current.year = year;
+      current.month = month;
+      yearViewDialog.close();
+      render();
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+
+    list.appendChild(card);
+  }
+
+  summary.innerHTML = `
+    <div class="year-total-box">
+      全年總額：${money(yearTotal)}<br>
+      已繳：${money(yearPaid)}　待繳：${money(yearUnpaid)}
+    </div>
+  `;
+}
+
+document.getElementById('openYearView').addEventListener('click', () => {
+  renderYearView(current.year);
+  yearViewDialog.showModal();
+});
+
+document.getElementById('closeYearView').addEventListener('click', () => {
+  yearViewDialog.close();
 });
 
 
