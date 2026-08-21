@@ -694,9 +694,9 @@
   body{
     min-height:100vh;
     background-color:var(--bg);
-    background-position:center top;
+    background-position:center center;
     background-repeat:no-repeat;
-    background-size:100% auto;
+    background-size:cover;
     background-attachment:fixed;
     transition:background-image .25s ease;
   }
@@ -723,8 +723,8 @@
 
   @media (min-width:700px){
     body{
-      background-size:auto 100vh;
-      background-position:right top;
+      background-size:cover;
+      background-position:center center;
     }
     .container{
       background:rgba(255,248,233,.78);
@@ -734,68 +734,473 @@
     }
   }
 
+
+  /* ===== 一開始構想版：手機 App 風格 ===== */
+  html{
+    background:#fff8e9;
+  }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:#fff8e9 !important;
+    background-image:none !important;
+    color:var(--text);
+    padding-bottom:104px;
+  }
+
+  .app-shell{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 10% 22%, rgba(255,235,169,.5), transparent 28%),
+      radial-gradient(circle at 90% 68%, rgba(244,226,172,.42), transparent 24%),
+      #fff8e9;
+  }
+
+  .hero{
+    position:relative;
+    min-height:365px;
+    padding:52px 28px 26px;
+    margin:0;
+    border-radius:0;
+    background-color:#fff8e9;
+    background-position:center center;
+    background-repeat:no-repeat;
+    background-size:cover;
+    overflow:hidden;
+    text-align:left;
+  }
+
+  .hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(90deg, rgba(255,249,235,.97) 0%, rgba(255,249,235,.78) 34%, rgba(255,249,235,.18) 63%, rgba(255,249,235,.06) 100%),
+      linear-gradient(0deg, rgba(255,248,233,.92) 0%, transparent 28%);
+    pointer-events:none;
+  }
+
+  .hero-copy{
+    position:relative;
+    z-index:1;
+    max-width:260px;
+    padding-top:12px;
+    text-shadow:0 1px 0 rgba(255,255,255,.9);
+  }
+
+  .hero-title{
+    font-size:31px;
+    font-weight:900;
+    letter-spacing:.06em;
+    line-height:1.35;
+    color:#60442e;
+  }
+
+  .hero-subtitle{
+    margin-top:22px;
+    font-size:17px;
+    font-weight:650;
+    line-height:1.75;
+    color:#715640;
+  }
+
+  .container{
+    position:relative;
+    z-index:2;
+    max-width:500px;
+    margin:-28px auto 0;
+    padding:0 16px 30px;
+    background:transparent;
+  }
+
+  .card{
+    background:rgba(255,253,247,.96);
+    border:1px solid rgba(218,190,151,.52);
+    border-radius:24px;
+    padding:18px;
+    margin-bottom:14px;
+    box-shadow:0 8px 24px rgba(120,83,45,.09);
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+  }
+
+  .month-summary-card{
+    padding:14px 14px 16px;
+  }
+
+  .concept-month-row{
+    margin-bottom:14px;
+    gap:8px;
+  }
+
+  .month-btn{
+    flex:0 0 46px;
+    width:46px;
+    height:46px;
+    border-radius:15px;
+    background:#fbf2e4;
+    border:1px solid #ead8bd;
+    font-size:30px;
+    line-height:1;
+  }
+
+  .concept-month-label{
+    min-width:0;
+    flex:1;
+    height:46px;
+    border:0;
+    border-radius:15px;
+    background:transparent;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    font-weight:900;
+  }
+
+  .calendar-icon{
+    font-size:22px;
+  }
+
+  .concept-month-label .month-title{
+    flex:0 1 auto;
+    font-size:22px;
+    white-space:nowrap;
+  }
+
+  .down-arrow{
+    font-size:17px;
+    color:var(--muted);
+  }
+
+  .concept-summary{
+    gap:8px;
+  }
+
+  .summary-box{
+    position:relative;
+    min-width:0;
+    padding:15px 5px 14px;
+    border:1px solid #eee0cd;
+    border-radius:18px;
+    background:rgba(255,255,255,.82);
+    overflow:hidden;
+  }
+
+  .summary-label{
+    font-size:13px;
+    font-weight:750;
+  }
+
+  .amount{
+    margin-top:5px;
+    font-size:21px;
+    font-weight:900;
+  }
+
+  .total-amount{ color:#68462e; }
+  .paid{ color:#62a54f; }
+  .unpaid{ color:#e66e68; }
+
+  .summary-deco{
+    position:absolute;
+    right:5px;
+    bottom:4px;
+    font-size:16px;
+    opacity:.9;
+  }
+
+  .bills-card{
+    padding:14px 12px 8px;
+  }
+
+  .section-head{
+    padding:0 5px 9px;
+    margin:0;
+    border-bottom:1px solid #eadcc8;
+  }
+
+  .section-title{
+    font-size:18px;
+    font-weight:900;
+    margin:0;
+  }
+
+  .item-count{
+    color:var(--muted);
+    font-size:14px;
+    font-weight:700;
+  }
+
+  .edit-toggle{
+    border:1px solid #ead6bb;
+    background:#fffaf1;
+    border-radius:14px;
+    padding:8px 11px;
+    font-size:14px;
+  }
+
+  .edit-toggle.active{
+    background:#9a6843;
+    color:white;
+  }
+
+  .item{
+    min-height:82px;
+    grid-template-columns:34px minmax(0,1fr) 112px;
+    gap:9px;
+    border-bottom:1px dashed #eadcc8;
+    padding:8px 5px;
+  }
+
+  .item:last-child{
+    border-bottom:none;
+  }
+
+  .check{
+    width:25px;
+    height:25px;
+  }
+
+  .name{
+    font-size:16px;
+    font-weight:900;
+  }
+
+  .meta{
+    font-size:12px;
+    margin-top:5px;
+  }
+
+  .price-input{
+    font-size:16px;
+    font-weight:900;
+    background:transparent;
+  }
+
+  .currency{
+    left:5px;
+  }
+
+  .concept-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin:12px 0;
+  }
+
+  .concept-action-btn{
+    min-height:76px;
+    border:1px solid #ead5b8;
+    border-radius:20px;
+    background:rgba(255,253,248,.97);
+    color:#573b27;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    font-weight:900;
+    font-size:18px;
+    box-shadow:0 5px 14px rgba(118,78,42,.07);
+  }
+
+  .concept-action-icon{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:#9a6843;
+    color:white;
+    font-size:28px;
+    line-height:1;
+  }
+
+  .secondary-action .concept-action-icon{
+    background:conic-gradient(#d86c63 0 25%, #e8c36d 25% 50%, #75aab3 50% 75%, #75513a 75%);
+    font-size:0;
+  }
+
+  .mini-bear{
+    font-size:20px;
+  }
+
+  .concept-tip{
+    margin:8px 0 0;
+    padding-bottom:8px;
+  }
+
+  .bottom-nav{
+    position:fixed;
+    z-index:50;
+    left:50%;
+    bottom:max(8px, env(safe-area-inset-bottom));
+    transform:translateX(-50%);
+    width:min(calc(100% - 20px), 480px);
+    min-height:78px;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    align-items:end;
+    padding:8px 7px 7px;
+    border:1px solid #ead8bd;
+    border-radius:24px;
+    background:rgba(255,252,244,.96);
+    box-shadow:0 10px 32px rgba(89,56,29,.18);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+
+  .bottom-nav-btn{
+    position:relative;
+    border:0;
+    background:transparent;
+    color:#76553b;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    gap:3px;
+    min-height:57px;
+    border-radius:16px;
+    font-size:11px;
+    font-weight:800;
+  }
+
+  .bottom-nav-btn.active{
+    background:#fae9bd;
+  }
+
+  .nav-icon{
+    font-size:23px;
+    line-height:1;
+  }
+
+  .center-bear{
+    min-height:68px;
+  }
+
+  .big-bear{
+    position:absolute;
+    top:-23px;
+    font-size:58px;
+    filter:drop-shadow(0 4px 4px rgba(95,55,24,.13));
+  }
+
+  dialog{
+    max-height:88vh;
+  }
+
+  @media (max-width:390px){
+    .hero{
+      min-height:330px;
+      padding:46px 22px 22px;
+    }
+    .hero-title{font-size:27px}
+    .hero-subtitle{font-size:15px}
+    .concept-month-label .month-title{font-size:19px}
+    .amount{font-size:18px}
+    .summary-label{font-size:12px}
+    .item{
+      grid-template-columns:30px minmax(0,1fr) 100px;
+    }
+    .concept-action-btn{
+      font-size:16px;
+      gap:6px;
+    }
+    .concept-action-icon{
+      width:38px;
+      height:38px;
+    }
+  }
+
 </style>
 </head>
 <body>
-
-<div class="container">
-  <div class="hero">
-    <div class="bear">🐻</div>
-    <h1>我的熊熊記帳本</h1>
-    <p>用心記錄每一筆 ♡</p>
-  </div>
-
-  <div class="card">
-    <div class="month-row">
-      <button class="month-btn" id="prevMonth">‹</button>
-      <h2 class="month-title" id="monthTitle"></h2>
-      <button class="month-btn" id="nextMonth">›</button>
+<div class="app-shell">
+  <header class="hero" id="monthlyHero">
+    <div class="hero-copy">
+      <div class="hero-title">拉拉熊記帳本 🐻💕</div>
+      <div class="hero-subtitle">用心記錄每一筆，<br>讓生活更安心 ♡</div>
     </div>
+  </header>
 
-    <div class="month-picker-wrap">
-      <button class="month-picker-open" id="openMonthPicker">📅 選擇年月</button>
-    </div>
-
-    <div class="summary">
-      <div>
-        <div class="summary-label">本月總額</div>
-        <div class="amount" id="total">$0</div>
+  <main class="container">
+    <section class="card month-summary-card">
+      <div class="month-row concept-month-row">
+        <button class="month-btn" id="prevMonth" aria-label="上個月">‹</button>
+        <button class="concept-month-label" id="openMonthPicker">
+          <span class="calendar-icon">📅</span>
+          <span class="month-title" id="monthTitle"></span>
+          <span class="down-arrow">⌄</span>
+        </button>
+        <button class="month-btn" id="nextMonth" aria-label="下個月">›</button>
       </div>
-      <div>
-        <div class="summary-label">已繳</div>
-        <div class="amount paid" id="paid">$0</div>
+
+      <div class="summary concept-summary">
+        <div class="summary-box">
+          <div class="summary-label">本月總金額</div>
+          <div class="amount total-amount" id="total">$0</div>
+          <div class="summary-deco">👛</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">已繳金額</div>
+          <div class="amount paid" id="paid">$0</div>
+          <div class="summary-deco">✅</div>
+        </div>
+        <div class="summary-box">
+          <div class="summary-label">待繳金額</div>
+          <div class="amount unpaid" id="unpaid">$0</div>
+          <div class="summary-deco">🕘</div>
+        </div>
       </div>
-      <div>
-        <div class="summary-label">待繳</div>
-        <div class="amount unpaid" id="unpaid">$0</div>
+    </section>
+
+    <section class="card bills-card">
+      <div class="section-head">
+        <h2 class="section-title">📋 本月繳費項目 <span id="itemCount" class="item-count"></span></h2>
+        <button class="edit-toggle" id="editModeBtn">✏️ 編輯</button>
       </div>
+      <div id="items"></div>
+    </section>
+
+    <section class="concept-actions">
+      <button class="concept-action-btn primary-action" id="addBtn">
+        <span class="concept-action-icon">＋</span>
+        <span>記一筆支出</span>
+        <span class="mini-bear">🐻</span>
+      </button>
+      <button class="concept-action-btn secondary-action" id="statsBtn">
+        <span class="concept-action-icon">◔</span>
+        <span>查看統計</span>
+        <span class="mini-bear">🐻‍❄️</span>
+      </button>
+    </section>
+
+    <div class="tip concept-tip">
+      新增、修改、勾選已繳後都會自動儲存 ♡
     </div>
-  </div>
+  </main>
 
-  <div class="card">
-    <div class="section-head">
-      <h2 class="section-title">本月繳費 🧾</h2>
-      <button class="edit-toggle" id="editModeBtn">✏️ 編輯</button>
-    </div>
-    <div id="items"></div>
-  </div>
-
-  <div class="home-actions">
-    <button class="btn btn-primary" id="addBtn">＋ 新增繳費</button>
-    <button class="btn btn-secondary" id="favoritesBtn">⭐ 常用項目</button>
-  </div>
-
-  <div class="more-row">
-    <button class="btn btn-secondary" id="moreBtn">☰ 更多功能</button>
-  </div>
-
-  <div class="tip">
-    新增、修改金額、勾選已繳、刪除、加入常用都會自動儲存。<br>
-    每個月份的資料會分開保存。
-  </div>
+  <nav class="bottom-nav" aria-label="主要功能">
+    <button class="bottom-nav-btn active" id="navHome">
+      <span class="nav-icon">🏠</span><span>首頁</span>
+    </button>
+    <button class="bottom-nav-btn" id="navRecords">
+      <span class="nav-icon">☷</span><span>所有紀錄</span>
+    </button>
+    <button class="bottom-nav-btn center-bear" id="favoritesBtn" aria-label="常用項目">
+      <span class="big-bear">🐻</span>
+    </button>
+    <button class="bottom-nav-btn" id="navCalendar">
+      <span class="nav-icon">📅</span><span>行事曆</span>
+    </button>
+    <button class="bottom-nav-btn" id="moreBtn">
+      <span class="nav-icon">⚙️</span><span>設定</span>
+    </button>
+  </nav>
 </div>
-
-
 
 <dialog id="moreDialog">
   <div class="dialog-body">
@@ -1230,11 +1635,9 @@ const MONTH_BACKGROUNDS = [
 
 function applyMonthlyBackground(month){
   const uri = MONTH_BACKGROUNDS[month - 1];
-  if(!uri) return;
-
-  // A light cream veil keeps the accounting text readable.
-  document.body.style.backgroundImage =
-    `linear-gradient(rgba(255,248,233,.43), rgba(255,248,233,.62)), url("${uri}")`;
+  const hero = document.getElementById('monthlyHero');
+  if(!uri || !hero) return;
+  hero.style.backgroundImage = `url("${uri}")`;
 }
 
 const MONTHS_KEY = 'bear-money-book-months-v1';
@@ -1522,6 +1925,9 @@ function render(){
 }
 
 function updateSummary(items){
+  const count = document.getElementById('itemCount');
+  if(count) count.textContent = `（${items.length} 項）`;
+
   const total = items.reduce((sum, x) => sum + Number(x.amount || 0), 0);
   const paid = items.reduce((sum, x) => sum + (x.paid ? Number(x.amount || 0) : 0), 0);
 
@@ -2081,6 +2487,27 @@ document.getElementById('moreClearMonth').addEventListener('click', () => {
 document.getElementById('moreClearYear').addEventListener('click', () => {
   moreDialog.close();
   clearCurrentYear();
+});
+
+
+document.getElementById('statsBtn').addEventListener('click', () => {
+  renderYearView(current.year);
+  yearViewDialog.showModal();
+});
+
+document.getElementById('navRecords').addEventListener('click', () => {
+  renderYearView(current.year);
+  yearViewDialog.showModal();
+});
+
+document.getElementById('navCalendar').addEventListener('click', () => {
+  document.getElementById('pickYear').value = current.year;
+  document.getElementById('pickMonth').value = current.month;
+  monthPickerDialog.showModal();
+});
+
+document.getElementById('navHome').addEventListener('click', () => {
+  window.scrollTo({top:0, behavior:'smooth'});
 });
 
 render();
