@@ -775,6 +775,7 @@
   <div class="card">
     <div class="section-head">
       <h2 class="section-title">本月繳費 🧾</h2>
+      <button class="edit-toggle" id="editModeBtn">✏️ 編輯</button>
     </div>
     <div id="items"></div>
   </div>
@@ -804,7 +805,6 @@
       <button class="btn btn-secondary" type="button" id="moreYearView">📊 看整年度</button>
       <button class="btn btn-secondary" type="button" id="moreFixed">🔁 固定繳費</button>
       <button class="btn btn-secondary" type="button" id="moreImport">📥 匯入備忘錄</button>
-      <button class="btn btn-secondary" type="button" id="moreEdit">✏️ 編輯本月資料</button>
       <button class="btn btn-secondary" type="button" id="moreRestore">↩️ 還原上一次備份</button>
     </div>
 
@@ -1859,7 +1859,17 @@ let editMode = false;
 function setEditMode(on){
   editMode = on;
   document.body.classList.toggle('edit-mode', editMode);
+
+  const btn = document.getElementById('editModeBtn');
+  if(btn){
+    btn.classList.toggle('active', editMode);
+    btn.textContent = editMode ? '✅ 完成' : '✏️ 編輯';
+  }
 }
+
+document.getElementById('editModeBtn').addEventListener('click', () => {
+  setEditMode(!editMode);
+});
 
 
 function clearCurrentMonth(){
@@ -2030,8 +2040,6 @@ fixedForm.addEventListener('submit', (e) => {
 const moreDialog = document.getElementById('moreDialog');
 
 document.getElementById('moreBtn').addEventListener('click', () => {
-  document.getElementById('moreEdit').textContent =
-    editMode ? '✅ 完成編輯' : '✏️ 編輯本月資料';
   moreDialog.showModal();
 });
 
@@ -2058,14 +2066,7 @@ document.getElementById('moreImport').addEventListener('click', () => {
   importDialog.showModal();
 });
 
-document.getElementById('moreEdit').addEventListener('click', () => {
-  const next = !editMode;
-  moreDialog.close();
-  setEditMode(next);
-  if(next){
-    alert('已進入編輯模式。修改完成後，到「☰ 更多功能」點「✅ 完成編輯」。');
-  }
-});
+
 
 document.getElementById('moreRestore').addEventListener('click', () => {
   moreDialog.close();
