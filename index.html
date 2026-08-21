@@ -650,6 +650,15 @@
     <button class="btn btn-import" id="importNotesBtn">📥 匯入備忘錄</button>
   </div>
 
+  <div class="actions" style="margin-top:12px;">
+    <button class="btn btn-secondary" id="clearMonthBtn">🗑️ 清空本月</button>
+    <button class="btn btn-secondary" id="clearYearBtn">🗑️ 清空整年度</button>
+  </div>
+
+  <div class="import-row">
+    <button class="btn btn-import" id="restoreBackupBtn">↩️ 還原上一次備份</button>
+  </div>
+
   <div class="tip">
     新增、修改金額、勾選已繳、刪除、加入常用都會自動儲存。<br>
     每個月份的資料會分開保存。
@@ -1006,6 +1015,7 @@ function importParsedNotes(parsed){
 
 const MONTHS_KEY = 'bear-money-book-months-v1';
 const FAVORITES_KEY = 'bear-money-book-favorites-v1';
+const BACKUP_KEY = 'bear-money-book-last-backup-v1';
 
 let current = { year: 2026, month: 8 };
 
@@ -1046,6 +1056,53 @@ function setCurrentItems(items){
   const all = loadAllMonths();
   all[monthKey(current.year,current.month)] = items;
   saveAllMonths(all);
+}
+
+
+function createBackup(reason){
+  const snapshot = {
+    reason,
+    time:new Date().toISOString(),
+    months:loadAllMonths(),
+    favorites:loadFavorites()
+  };
+  localStorage.setItem(BACKUP_KEY, JSON.stringify(snapshot));
+}
+
+function loadBackup(){
+  try{
+    return JSON.parse(localStorage.getItem(BACKUP_KEY)) || null;
+  }catch(e){
+    return null;
+  }
+}
+
+function restoreBackup(){
+  const backup = loadBackup();
+  if(!backup){
+    alert('目前沒有可以還原的備份');
+    return;
+  }
+
+  if(!confirm('要還原上一次備份嗎？目前資料會先被覆蓋。')){
+    return;
+  }
+
+  // Save current state too, so accidental restore is less risky.
+  const currentSnapshot = {
+    reason:'還原前自動備份',
+    time:new Date().toISOString(),
+    months:loadAllMonths(),
+    favorites:loadFavorites()
+  };
+
+  localStorage.setItem(MONTHS_KEY, JSON.stringify(backup.months || {}));
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(backup.favorites || []));
+
+  // The state from before restore becomes the new "last backup".
+  localStorage.setItem(BACKUP_KEY, JSON.stringify(currentSnapshot));
+  render();
+  alert('已還原上一次備份');
 }
 
 function money(n){
@@ -1176,9 +1233,14 @@ function render(){
 
     del.addEventListener('click', () => {
       if(confirm(`刪除「${item.name}」嗎？`)){
+        createBackup(`刪除 ${item.name}`);
         const next = getCurrentItems().filter(x => x.id !== item.id);
         setCurrentItems(next);
         render();
+
+        if(confirm(`已刪除「${item.name}」。要立刻復原嗎？`)){
+          restoreBackup();
+        }
       }
     });
 
@@ -1515,6 +1577,7 @@ document.getElementById('backToImport').addEventListener('click', () => {
 document.getElementById('confirmImport').addEventListener('click', () => {
   if(!pendingImport) return;
 
+  createBackup('匯入備忘錄前');
   const result = importParsedNotes(pendingImport);
   importPreviewDialog.close();
 
@@ -1541,6 +1604,52 @@ document.getElementById('editModeBtn').addEventListener('click', () => {
   btn.classList.toggle('active', editMode);
   btn.textContent = editMode ? '✅ 完成' : '✏️ 編輯';
 });
+
+
+document.getElementById('clearMonthBtn').addEventListener('click', () => {
+  const items = getCurrentItems();
+
+  if(items.length === 0){
+    alert('這個月份目前沒有資料');
+    return;
+  }
+
+  const label = `${current.year} 年 ${current.month} 月`;
+  if(!confirm(`確定要清空 ${label} 的所有資料嗎？\n清空前會自動備份。`)){
+    return;
+  }
+
+  createBackup(`清空 ${label} 前`);
+  const all = loadAllMonths();
+  all[monthKey(current.year,current.month)] = [];
+  saveAllMonths(all);
+  render();
+  alert(`${label} 已清空。需要時可以按「↩️ 還原上一次備份」。`);
+});
+
+document.getElementById('clearYearBtn').addEventListener('click', () => {
+  const year = current.year;
+  const all = loadAllMonths();
+  const keys = Object.keys(all).filter(key => key.startsWith(`${year}-`));
+  const count = keys.reduce((sum,key) => sum + (all[key] || []).length, 0);
+
+  if(count === 0){
+    alert(`${year} 年目前沒有資料`);
+    return;
+  }
+
+  if(!confirm(`確定要清空 ${year} 年 1～12 月的所有資料嗎？\n共 ${count} 筆。\n清空前會自動備份。`)){
+    return;
+  }
+
+  createBackup(`清空 ${year} 年前`);
+  keys.forEach(key => delete all[key]);
+  saveAllMonths(all);
+  render();
+  alert(`${year} 年已清空，可以重新匯入整年度備忘錄。`);
+});
+
+document.getElementById('restoreBackupBtn').addEventListener('click', restoreBackup);
 
 render();
 </script>
