@@ -1424,6 +1424,29 @@
     line-height:1.1 !important;
   }
 
+
+  /* ===== 修改文字：長備註自動換行／自動增高 ===== */
+  .edit-note{
+    display:block;
+    width:100%;
+    min-height:48px;
+    max-height:180px;
+    resize:none;
+    overflow-y:auto;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.45;
+    box-sizing:border-box;
+  }
+
+  .meta{
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.45;
+  }
+
 </style>
 </head>
 <body>
@@ -2206,7 +2229,7 @@ function render(){
 
       main.innerHTML = `
         <input class="edit-input edit-name" type="text">
-        <input class="edit-input edit-note" type="text">
+        <textarea class="edit-input edit-note" rows="2"></textarea>
         <div class="row-actions">
           <button class="tiny-btn save-text-btn" type="button">儲存文字</button>
           <button class="tiny-btn cancel-text-btn" type="button">取消</button>
@@ -2217,6 +2240,14 @@ function render(){
       const noteInput = main.querySelector('.edit-note');
       nameInput.value = currentName;
       noteInput.value = currentNote;
+
+      const autoGrowNote = () => {
+        noteInput.style.height = 'auto';
+        noteInput.style.height = `${Math.max(noteInput.scrollHeight, 48)}px`;
+      };
+      autoGrowNote();
+      noteInput.addEventListener('input', autoGrowNote);
+
       nameInput.focus();
 
       main.querySelector('.save-text-btn').addEventListener('click', () => {
